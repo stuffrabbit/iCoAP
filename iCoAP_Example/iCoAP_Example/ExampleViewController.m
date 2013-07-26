@@ -68,10 +68,15 @@
     NSLog(@"\nMessage:\n\nType: %@\nResponseCode: %@\nOption: %@\nMessageID: %i\nToken: %i\nPayload: '%@'", typeString, codeString, optString, coapMessage.messageID, coapMessage.token, [NSString stringFromHexString:coapMessage.payload] );
     NSLog(@"---------------------------");
     NSLog(@"---------------------------");
+    
+    //did you receive the expected message? then it is recommended to use the closeTransmission method:
+    [iTrans closeTransmission];
+    
 }
 
 - (void)iCoAPTransmission:(iCoAPTransmission *)transmission didFailWithErrorCode:(iCoAPTransmissionErrorCode)error {
     if (error == UDP_SOCKET_ERROR || error == NO_RESPONSE_EXPECTED) {
+        [self.textView setText:@"Failed..."];
         self.activityIndicator.hidden = YES;
     }
 }
@@ -87,7 +92,7 @@
 #pragma mark - Action
 
 - (IBAction)onTapSend:(id)sender {
-    // Create iCoAPMessage first. U can alternatively use the standard 'init' mehtod
+    // Create iCoAPMessage first. You can alternatively use the standard 'init' method
     // and set all properties manually
     iCoAPMessage *cO = [[iCoAPMessage alloc] initAsRequestConfirmable:YES requestMethod:GET sendToken:YES payload:@""];
     [cO addOptionNumber:URI_PATH withValue:self.textField.text];
@@ -96,9 +101,18 @@
     // [cO addOptionNumber:OBSERVE withValue:@""];
     
     
-    // finally initialize the iCoAPTransmission Object. U can alternatively use the standard 'init' mehtod
-    // and set all properties manually
-    iTrans = [[iCoAPTransmission alloc] initWithRegistrationAndSendRequestWithCoAPMessage:cO toHost:@"ns.tzi.org" port:61616 delegate:self];
+    // finally initialize the iCoAPTransmission Object. You can alternatively use the standard 'init' method
+    // and set all properties manually.
+    // coap.me is a test coap server you can use. Note that it might be offline from time to time.
+    if (iTrans == nil) {
+        iTrans = [[iCoAPTransmission alloc] initWithRegistrationAndSendRequestWithCoAPMessage:cO toHost:@"4.coap.me" port:5683 delegate:self];
+    }
+    else {
+        // Make sure to always close transmission before you send a new message. If you want to sent multiple message
+        // simultaneously simply initialize a new iCoAPTransmission object
+        [iTrans closeTransmission];
+        [iTrans registerAndSendRequestWithCoAPMessage:cO toHost:@"4.coap.me" port:5683];
+    }
 
     self.activityIndicator.hidden = NO;
 }
