@@ -22,15 +22,15 @@ iCoAPMessage *cO = [[iCoAPMessage alloc] initAsRequestConfirmable:YES
                                          sendToken:YES 
                                          payload:@""];
 ```
-Alternatively you can use the standard `init` Method and set the required properties manually.
+  Alternatively you can use the standard `init` Method and set the required properties manually.
 
 * Modify your Message, e.g. by adding Options like
 
 ```objc 
-[cO addOptionNumber:URI_PATH withValue:self.textField.text];
+[cO addOptionNumber:URI_PATH withValue:@"well-known/core"];
 ```
 
-* Initialize the `iCoAPTransmission` object and send your message to the desired destination. You can use the method which performs a sending on initialization:
+* Initialize the `iCoAPTransmission` object and send your message to the desired destination. You can use the following method which performs a sending on initialization:
 
 ```objc 
 iCoAPTransmission *transmission = 
@@ -39,15 +39,20 @@ iCoAPTransmission *transmission =
                                      port:5683 
                                      delegate:self];
 ```
-Alternatively you can use the standard `init` Method, set the required properties and send manually.
+  Alternatively you can use the standard `init` method, alter properties (optional, but don't forget to set the delegate) and send manually like:
+```objc 
+[transmission registerAndSendRequestWithCoAPMessage:cO toHost:@"4.coap.me" port:5683];
+```
 
-* Implement the delegate Methods from the provided
+* Implement the delegate methods from the provided `iCoAPTransmissionDelegate` protocol.
+
+Now you should be able to communicate.
 
 Details and Examples:
 ====
 
 For detailled information checkout the `iCoAP_Example` App, which provides a simple example of how to use the `iCoAP` Library.
-Additionally, make sure to read the comments in both the `iCoAPTransmission.h` and the `iCoAPMessage.h` files. The available Category `NSString+hex.h` might also be of use by encoding values for the CoAP Communication.
+Additionally, make sure to read the comments in both the `iCoAPTransmission.h` and the `iCoAPMessage.h` files. The available Category `NSString+hex.h` might also be of use by encoding values for the CoAP communication.
 
 
 Used Libraries:
