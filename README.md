@@ -51,7 +51,7 @@ Now you should be able to communicate.
 Details and Examples:
 ====
 
-For detailled information checkout the `iCoAP_Example` App, which provides a simple example of how to use the `iCoAP` Library.
+For detailed information checkout the `iCoAP_Example` App, which provides a simple example of how to use the `iCoAP` Library.
 Additionally, make sure to read the comments in both the `iCoAPTransmission.h` and the `iCoAPMessage.h` files. The available Category `NSString+hex.h` might also be of use by encoding values for the CoAP communication.
 
 
