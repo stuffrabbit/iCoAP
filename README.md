@@ -2,6 +2,11 @@ iCoAP
 =====
 
 This project is an Objective-C implementation of the "Constrained Application Protocol" (CoAP) for Clients only.
+The current version has besides the standard CoAP features the following additions:
+* Observe
+* Block transfer in responses (Block 2)
+
+Since this project is quite new, any sort of constructive feedback is highly appreciated!
 
 
 Getting Started
