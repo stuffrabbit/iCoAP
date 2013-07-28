@@ -38,8 +38,9 @@
 #pragma mark - iCoAP Transmission Delegate
 
 - (void)iCoAPTransmission:(iCoAPTransmission *)transmission didReceiveCoAPMessage:(iCoAPMessage *)coapMessage {
-    if (coapMessage.type == ACKNOWLEDGMENT && coapMessage.code != 0) {
-        //Empty ACK Message received: Indicator for Seperate Message. Keep loading animation...
+    //If empty ACK Message received: Indicator for Seperate Message and don't hide activity indicator
+
+    if (coapMessage.code != 0) {
         self.activityIndicator.hidden = YES;
     }
     
@@ -69,9 +70,12 @@
     NSLog(@"---------------------------");
     NSLog(@"---------------------------");
     
-    //did you receive the expected message? then it is recommended to use the closeTransmission method:
-    [iTrans closeTransmission];
+    // did you receive the expected message? then it is recommended to use the closeTransmission method
+    // unless more messages are expected, like e.g. block message, or observe.
     
+    //          [iTrans closeTransmission];
+
+
 }
 
 - (void)iCoAPTransmission:(iCoAPTransmission *)transmission didFailWithErrorCode:(iCoAPTransmissionErrorCode)error {
