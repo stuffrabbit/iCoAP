@@ -181,6 +181,8 @@
 
 - (NSString *)getCodeDisplayStringForCoAPObject:(iCoAPMessage *)cO {
     switch (cO.code) {
+        case EMPTY:
+            return @"Empty";
         case CREATED:
             return @"Created";
         case DELETED:

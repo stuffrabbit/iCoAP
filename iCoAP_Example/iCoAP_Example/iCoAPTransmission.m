@@ -389,6 +389,7 @@
         cO.token = 1 + arc4random() % 65535;
     }
     
+    cO.isRequest = YES;
     cO.host = host;
     cO.port = port;
 

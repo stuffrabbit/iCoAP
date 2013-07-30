@@ -35,6 +35,7 @@ typedef enum {
 } RequestMethod;
 
 typedef enum {
+    EMPTY = 0,
     CREATED = 65,
     DELETED = 66,
     VALID = 67,
