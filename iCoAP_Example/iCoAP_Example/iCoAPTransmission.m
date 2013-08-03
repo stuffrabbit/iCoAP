@@ -312,7 +312,6 @@
             blockObject.code = pendingCoAPMessageInTransmission.code;
             blockObject.messageID = pendingCoAPMessageInTransmission.messageID + 1;
             blockObject.token = pendingCoAPMessageInTransmission.token;
-            blockObject.optionDict = [[NSMutableDictionary alloc] initWithDictionary:pendingCoAPMessageInTransmission.optionDict];
             blockObject.host = pendingCoAPMessageInTransmission.host;
             blockObject.port = pendingCoAPMessageInTransmission.port;
 
