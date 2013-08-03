@@ -306,8 +306,16 @@
         
         if (blockTail > 7) {
             //More Flag is set
-            iCoAPMessage *blockObject = pendingCoAPMessageInTransmission;
-            blockObject.messageID++;
+            iCoAPMessage *blockObject = [[iCoAPMessage alloc] init];
+            blockObject.isRequest = YES;
+            blockObject.type = CONFIRMABLE;
+            blockObject.code = pendingCoAPMessageInTransmission.code;
+            blockObject.messageID = pendingCoAPMessageInTransmission.messageID + 1;
+            blockObject.token = pendingCoAPMessageInTransmission.token;
+            blockObject.optionDict = [[NSMutableDictionary alloc] initWithDictionary:pendingCoAPMessageInTransmission.optionDict];
+            blockObject.host = pendingCoAPMessageInTransmission.host;
+            blockObject.port = pendingCoAPMessageInTransmission.port;
+
             NSString *newBlockValue;
             
             if (blockNum >= 4095 ) {
