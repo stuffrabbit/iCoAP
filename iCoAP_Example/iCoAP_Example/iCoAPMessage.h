@@ -156,18 +156,22 @@ typedef enum {
 
 /*
  *  'host':
- *  The destination host
+ *  The destination host.
  */
 @property (copy) NSString *host;
 
 /*
  *  'port':
- *  The destination port
+ *  The destination port.
  */
 @property (readwrite, nonatomic) uint port;
 
 
-
+/*
+ *  'timestamp':
+ *  The timestamp, the iCoAPMessage is sent or received.
+ */
+@property (strong, nonatomic) NSDate *timestamp;
 
 
 

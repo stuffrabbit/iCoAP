@@ -265,8 +265,10 @@
         return;
     }
 
-    //Check for spam and if Observe is Cancelled
+    //Set Timestamp
+    cO.timestamp = [NSDate date];
     
+    //Check for spam and if Observe is Cancelled
     if ((cO.messageID != pendingCoAPMessageInTransmission.messageID && cO.token != pendingCoAPMessageInTransmission.token) || ([cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", OBSERVE]] != nil && isObserveCancelled && cO.type != ACKNOWLEDGMENT)) {
         if (cO.type <= NON_CONFIRMABLE) {
             [self sendCircumstantialResponseWithMessageID:cO.messageID token:cO.token type:RESET toAddress:address];
@@ -417,6 +419,8 @@
     [maxWaitTimer invalidate];
     isObserveCancelled = NO;
     observeOptionValue = 0;
+    
+    pendingCoAPMessageInTransmission.timestamp = [NSDate date];
     
     if (pendingCoAPMessageInTransmission.type == CONFIRMABLE) {
         retransmissionCounter = 0;

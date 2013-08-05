@@ -11,6 +11,8 @@
 @interface ExampleViewController : UIViewController<iCoAPTransmissionDelegate, UITextFieldDelegate> {
     iCoAPTransmission *iTrans;
     int count;
+    
+    NSDateFormatter *completeDateFormat;
 }
 @property (weak, nonatomic) IBOutlet UITextField *textField;
 @property (weak, nonatomic) IBOutlet UITextView *textView;

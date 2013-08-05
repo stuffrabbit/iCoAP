@@ -26,7 +26,8 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	// Do any additional setup after loading the view.
+    completeDateFormat = [[NSDateFormatter alloc] init];
+    [completeDateFormat setDateFormat:@"EEE dd.MM.yyyy"];
 }
 
 - (void)didReceiveMemoryWarning
@@ -47,7 +48,8 @@
     count++;
     NSString *codeString = [self getCodeDisplayStringForCoAPObject:coapMessage];
     NSString *typeString = [self getTypeDisplayStringForCoAPObject:coapMessage];
-    
+    NSString *dateString = [completeDateFormat stringFromDate:coapMessage.timestamp];
+
     NSMutableString *optString = [[NSMutableString alloc] init];
     for (id key in coapMessage.optionDict) {
         [optString appendString:@"Option: "];
@@ -62,11 +64,11 @@
     
 
     if (transmission == iTrans) {
-        [self.textView setText:[NSString stringWithFormat:@"(%i) Message:\n\nType: %@\nResponseCode: %@\n%@\nMessageID: %i\nToken: %i\nPayload: '%@'\n\n%@", count, typeString, codeString, optString , coapMessage.messageID, coapMessage.token, [NSString stringFromHexString:coapMessage.payload], self.textView.text]];
+        [self.textView setText:[NSString stringWithFormat:@"(%i) Message from: %@\n\nType: %@\nResponseCode: %@\n%@\nMessageID: %i\nToken: %i\nPayload: '%@'\n\n%@", count, dateString, typeString, codeString, optString , coapMessage.messageID, coapMessage.token, [NSString stringFromHexString:coapMessage.payload], self.textView.text]];
         
     }
     
-    NSLog(@"\nMessage:\n\nType: %@\nResponseCode: %@\nOption: %@\nMessageID: %i\nToken: %i\nPayload: '%@'", typeString, codeString, optString, coapMessage.messageID, coapMessage.token, [NSString stringFromHexString:coapMessage.payload] );
+    NSLog(@"\nMessage: %@\n\nType: %@\nResponseCode: %@\nOption: %@\nMessageID: %i\nToken: %i\nPayload: '%@'", dateString, typeString, codeString, optString, coapMessage.messageID, coapMessage.token, [NSString stringFromHexString:coapMessage.payload] );
     NSLog(@"---------------------------");
     NSLog(@"---------------------------");
     
