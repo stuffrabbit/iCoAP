@@ -282,22 +282,13 @@
         [maxWaitTimer invalidate];
     }
 
+    if (cO.type == ACKNOWLEDGMENT && cO.code == 0) {
+        cO.isFinal = NO;
+    }
+    
     //Separate Response / Observe: Send ACK
     if (cO.type == CONFIRMABLE) {        
         [self sendCircumstantialResponseWithMessageID:cO.messageID token:cO.token type:ACKNOWLEDGMENT toAddress:address];
-    }
-    
-    //Check for Observe Option: If Observe Option is present, the message is only sent to the delegate if the order is correct.
-    if ([cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", OBSERVE]] != nil && cO.type != ACKNOWLEDGMENT) {
-        uint currentObserveValue = strtol([[cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", OBSERVE]] UTF8String], NULL, 16);
-        if (currentObserveValue > observeOptionValue) {
-            observeOptionValue = currentObserveValue;
-            [self sendDidReceiveMessageToDelegateWithCoAPMessage:cO];
-        }
-    }
-    else {
-        //No Observe Option: Sending object to delegate
-        [self sendDidReceiveMessageToDelegateWithCoAPMessage:cO];
     }
     
     //Block Options: Only send a Block2 request when observe option is inactive:
@@ -333,7 +324,21 @@
             
             pendingCoAPMessageInTransmission = blockObject;
             [self startSending];
+            cO.isFinal = NO;
         }
+    }
+    
+    //Check for Observe Option: If Observe Option is present, the message is only sent to the delegate if the order is correct.
+    if ([cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", OBSERVE]] != nil && cO.type != ACKNOWLEDGMENT) {
+        uint currentObserveValue = strtol([[cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", OBSERVE]] UTF8String], NULL, 16);
+        if (currentObserveValue > observeOptionValue) {
+            observeOptionValue = currentObserveValue;
+            [self sendDidReceiveMessageToDelegateWithCoAPMessage:cO];
+        }
+    }
+    else {
+        //No Observe Option: Sending object to delegate
+        [self sendDidReceiveMessageToDelegateWithCoAPMessage:cO];
     }
 
 }

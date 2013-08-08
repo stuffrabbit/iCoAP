@@ -116,6 +116,17 @@ typedef enum {
 @property (readwrite, nonatomic) BOOL isTokenRequested;
 
 /*
+ *  'isFinal':
+ *  Indicates in a response if a successive message is expected.
+ *  E.g. an empty ACK message indicates a separate response,
+ *  or a Block2 message with more-bit set indicates successive
+ *  Block2 messages.
+ *  This value serves only to inform the user and can be ignored in a request. 
+ *  
+ */
+@property (readwrite, nonatomic) BOOL isFinal;
+
+/*
  *  'type':
  *  The CoAP Message Type
  */

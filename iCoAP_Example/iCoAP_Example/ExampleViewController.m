@@ -41,7 +41,7 @@
 - (void)iCoAPTransmission:(iCoAPTransmission *)transmission didReceiveCoAPMessage:(iCoAPMessage *)coapMessage {
     //If empty ACK Message received: Indicator for Seperate Message and don't hide activity indicator
 
-    if (coapMessage.code != 0) {
+    if (coapMessage.isFinal) {
         self.activityIndicator.hidden = YES;
     }
     
