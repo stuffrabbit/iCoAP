@@ -150,7 +150,7 @@
             
             NSString *optVal = [hexString substringWithRange:NSMakeRange(optionIndex + optionIndexOffset, optionLength * 2)];            
             
-            [cO addOptionNumber:optionDelta + extendedDelta + prevOptionDelta withValue:optVal];
+            [cO addOption:optionDelta + extendedDelta + prevOptionDelta withValue:optVal];
             
             prevOptionDelta += optionDelta + extendedDelta;
             optionIndex += optionIndexOffset + optionLength * 2;
@@ -193,56 +193,83 @@
     }];
     
     uint previousDelta = 0;
+    
     for (NSString* key in sortedArray) {
-        uint delta = [key intValue] - previousDelta;
-        uint length;
+        NSMutableArray *valueArray = [cO.optionDict valueForKey:key];
         
-        if ([key intValue] == BLOCK2 || [key intValue] == ETAG) {
-            length = [[cO.optionDict valueForKey:key] length] / 2;
+        for (uint i = 0; i < [valueArray count]; i++) {
+            uint delta = [key intValue] - previousDelta;
+            uint length;
+            NSString *valueForKey;
+            
+            if ([key intValue] == BLOCK2 || [key intValue] == ETAG || [key intValue] == IF_MATCH) {
+                valueForKey = [valueArray objectAtIndex:i];
+                length = [valueForKey length] / 2;
+            }
+            else if ([key intValue] == URI_PORT || [key intValue] == CONTENT_FORMAT || [key intValue] == MAX_AGE || [key intValue] == ACCEPT || [key intValue] == SIZE1) {
+                if ([[valueArray objectAtIndex:i] length] == 0) {
+                    valueForKey = @"";
+                }
+                else if ([[valueArray objectAtIndex:i] intValue] < 255) {
+                    valueForKey = [NSString stringWithFormat:@"%02X", [[valueArray objectAtIndex:i] intValue]];
+                }
+                else if ([[valueArray objectAtIndex:i] intValue] <= 65535) {
+                    valueForKey = [NSString stringWithFormat:@"%04X", [[valueArray objectAtIndex:i] intValue]];
+                }
+                else if ([[valueArray objectAtIndex:i] intValue] <= 16777215) {
+                    valueForKey = [NSString stringWithFormat:@"%06X", [[valueArray objectAtIndex:i] intValue]];
+                }
+                else {
+                    valueForKey = [NSString stringWithFormat:@"%08X", [[valueArray objectAtIndex:i] intValue]];
+                }
+                length = [valueForKey length] / 2;
+            }
+            else {
+                valueForKey = [valueArray objectAtIndex:i];
+                
+                length = [valueForKey length];
+            }
+            
+            NSString *extendedDelta = @"";
+            NSString *extendedLength = @"";
+            
+            if (delta >= 269) {
+                [final appendString:[NSString stringWithFormat:@"%01X", 14]];
+                extendedDelta = [NSString stringWithFormat:@"%04X", delta - 269];
+            }
+            else if (delta >= 13) {
+                [final appendString:[NSString stringWithFormat:@"%01X", 13]];
+                extendedDelta = [NSString stringWithFormat:@"%02X", delta - 13];
+            }
+            else {
+                [final appendString:[NSString stringWithFormat:@"%01X", delta]];
+            }
+            
+            if (length >= 269) {
+                [final appendString:[NSString stringWithFormat:@"%01X", 14]];
+                extendedLength = [NSString stringWithFormat:@"%04X", length - 269];
+            }
+            else if (length >= 13) {
+                [final appendString:[NSString stringWithFormat:@"%01X", 13]];
+                extendedLength = [NSString stringWithFormat:@"%02X", length - 13];
+            }
+            else {
+                [final appendString:[NSString stringWithFormat:@"%01X", length]];
+            }
+            
+            [final appendString:extendedDelta];
+            [final appendString:extendedLength];
+            
+            if ([key intValue] == BLOCK2 || [key intValue] == ETAG || [key intValue] == IF_MATCH || [key intValue] == URI_PORT || [key intValue] == CONTENT_FORMAT || [key intValue] == MAX_AGE || [key intValue] == ACCEPT || [key intValue] == SIZE1) {
+                [final appendString:valueForKey];
+            }
+            else {
+                [final appendString:[NSString hexStringFromString:valueForKey]];
+            }
+            
+            previousDelta += delta;
         }
-        else {
-            length = [[cO.optionDict valueForKey:key] length];
-        }
-        
-        NSString *extendedDelta = @"";
-        NSString *extendedLength = @"";
-        
-        if (delta >= 269) {
-            [final appendString:[NSString stringWithFormat:@"%01X", 14]];
-            extendedDelta = [NSString stringWithFormat:@"%04X", delta - 269];
-        }
-        else if (delta >= 13) {
-            [final appendString:[NSString stringWithFormat:@"%01X", 13]];
-            extendedDelta = [NSString stringWithFormat:@"%02X", delta - 13];
-        }
-        else {
-            [final appendString:[NSString stringWithFormat:@"%01X", delta]];
-        }
-        
-        if (length >= 269) {
-            [final appendString:[NSString stringWithFormat:@"%01X", 14]];
-            extendedLength = [NSString stringWithFormat:@"%04X", length - 269];
-            //
-        }
-        else if (length >= 13) {
-            [final appendString:[NSString stringWithFormat:@"%01X", 13]];
-            extendedLength = [NSString stringWithFormat:@"%02X", length - 13];
-        }
-        else {
-            [final appendString:[NSString stringWithFormat:@"%01X", length]];
-        }
-        
-        [final appendString:extendedDelta];
-        [final appendString:extendedLength];
-        
-        if ([key intValue] == BLOCK2 || [key intValue] == ETAG) {
-            [final appendString:[cO.optionDict valueForKey:key]];
-        }
-        else {
-            [final appendString:[NSString hexStringFromString:[cO.optionDict valueForKey:key]]];
-        }
-        
-        previousDelta += delta;
+
     }    
     
     //Payload encoded to UTF-8
@@ -293,7 +320,7 @@
     
     //Block Options: Only send a Block2 request when observe option is inactive:
     if ([cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", BLOCK2]] != nil && [cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", OBSERVE]] == nil) {
-        NSString *blockValue = [cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", BLOCK2]];
+        NSString *blockValue = [[cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", BLOCK2]] objectAtIndex:0];
         uint blockNum = strtol([[blockValue substringToIndex:[blockValue length] - 1] UTF8String], NULL, 16);
         uint blockTail = strtol([[blockValue substringFromIndex:[blockValue length] - 1] UTF8String], NULL, 16);
         
@@ -320,7 +347,7 @@
                 newBlockValue = [NSString stringWithFormat:@"%01X%01X", blockNum + 1, blockTail - 8];
             }
             
-            [blockObject.optionDict setValue:newBlockValue forKey:[NSString stringWithFormat:@"%i", BLOCK2]];
+            [blockObject addOption:BLOCK2 withValue:newBlockValue];
             
             pendingCoAPMessageInTransmission = blockObject;
             [self startSending];

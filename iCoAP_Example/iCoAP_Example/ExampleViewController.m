@@ -54,9 +54,15 @@
     for (id key in coapMessage.optionDict) {
         [optString appendString:@"Option: "];
         [optString appendString:[self getOptionDisplayStringForCoAPOptionDelta:[key intValue]]];
-        [optString appendString:@" Value: "];
-        [optString appendString:[coapMessage.optionDict valueForKey:key]];
-        [optString appendString:@"\n"];
+        
+        //Iterate over the array of option values
+        NSMutableArray *valueArray = [coapMessage.optionDict valueForKey:key];
+        for (uint i = 0; i < [valueArray count]; i++) {
+            [optString appendString:[NSString stringWithFormat:@" \nValue (%i): ", i + 1]];
+            [optString appendString:[valueArray objectAtIndex:i]];
+            [optString appendString:@"\n"];
+        }
+        [optString appendString:@"\n-----\n"];
     }
     
     NSLog(@"---------------------------");
@@ -101,10 +107,10 @@
     // Create iCoAPMessage first. You can alternatively use the standard 'init' method
     // and set all properties manually
     iCoAPMessage *cO = [[iCoAPMessage alloc] initAsRequestConfirmable:YES requestMethod:GET sendToken:YES payload:@""];
-    [cO addOptionNumber:URI_PATH withValue:self.textField.text];
+    [cO addOption:URI_PATH withValue:self.textField.text];
 
     // add more Options here if required e.g. observe
-    // [cO addOptionNumber:OBSERVE withValue:@""];
+    // [cO addOption:OBSERVE withValue:@""];
     
     
     // finally initialize the iCoAPTransmission Object. You can alternatively use the standard 'init' method

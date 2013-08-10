@@ -77,6 +77,7 @@ typedef enum {
     BLOCK1 = 27,
     PROXY_URI = 35,
     PROXY_SCHEME = 39,
+    SIZE1 = 60
 } Option;
 
 
@@ -210,10 +211,15 @@ typedef enum {
 - (id)initAsRequestConfirmable:(BOOL)con requestMethod:(uint)req sendToken:(BOOL)token payload:(NSString *)payload;
 
 /*
- *  'addOptionNumber:withValue'
- *  Adds an option number and its value to the option dictionary
+ *  'addOption:withValue'
+ *  Adds an option number and its value to the option dictionary.
+ *
+ *  The "key" of the dictionary: the number of the option.
+ *
+ *  The "value" of the dictionary: An NSMutableArray of option values
+ *  coresponding to the "key" option number
  */
-- (void)addOptionNumber:(uint)option withValue:(NSString *)value;
+- (void)addOption:(uint)option withValue:(NSString *)value;
 
 @end
 

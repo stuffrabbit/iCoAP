@@ -41,8 +41,18 @@
     return self;
 }
 
-- (void)addOptionNumber:(uint)option withValue:(NSString *)value {
-    [self.optionDict setValue:value forKey:[NSString stringWithFormat:@"%i", option]];
+- (void)addOption:(uint)option withValue:(NSString *)value {
+    NSMutableArray *valueArray;
+    
+    if ([self.optionDict valueForKey:[NSString stringWithFormat:@"%i", option]] == nil) {
+        valueArray = [[NSMutableArray alloc] init];
+        [self.optionDict setValue:valueArray forKey:[NSString stringWithFormat:@"%i", option]];
+    }
+    else {
+        valueArray = [self.optionDict valueForKey:[NSString stringWithFormat:@"%i", option]];
+    }
+    [valueArray addObject:value];
+
 }
 
 @end
