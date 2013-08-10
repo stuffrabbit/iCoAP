@@ -27,7 +27,8 @@ iCoAPMessage *cO = [[iCoAPMessage alloc] initAsRequestConfirmable:YES
 * Modify your Message, e.g. by adding Options like
 
 ```objc 
-[cO addOption:URI_PATH withValue:@"well-known/core"];
+[cO addOption:URI_PATH withValue:@".well-known"];
+[cO addOption:URI_PATH withValue:@"core"];
 ```
 Options are saved in an NSMutable Dictionary, where each dictionary "key" represents an option number and the matching dictionary "values" consist of NSMutableArrays of the corresponding option values.
 
