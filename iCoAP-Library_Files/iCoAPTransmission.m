@@ -357,7 +357,7 @@
     
     //Check for Observe Option: If Observe Option is present, the message is only sent to the delegate if the order is correct.
     if ([cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", OBSERVE]] != nil && cO.type != ACKNOWLEDGMENT) {
-        uint currentObserveValue = strtol([[cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", OBSERVE]] UTF8String], NULL, 16);
+        uint currentObserveValue = strtol([[[cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", OBSERVE]] objectAtIndex:0] UTF8String], NULL, 16);
         if (currentObserveValue > observeOptionValue) {
             observeOptionValue = currentObserveValue;
             [self sendDidReceiveMessageToDelegateWithCoAPMessage:cO];
