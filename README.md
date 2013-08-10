@@ -27,8 +27,9 @@ iCoAPMessage *cO = [[iCoAPMessage alloc] initAsRequestConfirmable:YES
 * Modify your Message, e.g. by adding Options like
 
 ```objc 
-[cO addOptionNumber:URI_PATH withValue:@"well-known/core"];
+[cO addOption:URI_PATH withValue:@"well-known/core"];
 ```
+Options are saved in an NSMutable Dictionary, where each dictionary "key" represents an option number and the matching dictionary "values" consist of NSMutableArrays of the corresponding option values.
 
 * Initialize the `iCoAPTransmission` object and send your message to the desired destination. You can use the following method which performs a sending on initialization:
 
