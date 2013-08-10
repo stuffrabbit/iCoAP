@@ -212,7 +212,12 @@ typedef enum {
 
 /*
  *  'addOption:withValue'
- *  Adds an option number and its value to the option dictionary
+ *  Adds an option number and its value to the option dictionary.
+ *
+ *  The "key" of the dictionary: the number of the option.
+ *
+ *  The "value" of the dictionary: An NSMutableArray of option values
+ *  coresponding to the "key" option number
  */
 - (void)addOption:(uint)option withValue:(NSString *)value;
 
