@@ -70,16 +70,16 @@
     
 
     if (transmission == iTrans) {
-        [self.textView setText:[NSString stringWithFormat:@"(%i) Message from: %@\n\nType: %@\nResponseCode: %@\n%@\nMessageID: %i\nToken: %i\nPayload: '%@'\n\n%@", count, dateString, typeString, codeString, optString , coapMessage.messageID, coapMessage.token, [NSString stringFromHexString:coapMessage.payload], self.textView.text]];
+        [self.textView setText:[NSString stringWithFormat:@"(%i) Message from: %@\n\nType: %@\nResponseCode: %@\n%@\nMessageID: %i\nToken: %i\nPayload: '%@'\n\n%@", count, dateString, typeString, codeString, optString , coapMessage.messageID, coapMessage.token, coapMessage.payload, self.textView.text]];
         
     }
     
-    NSLog(@"\nMessage: %@\n\nType: %@\nResponseCode: %@\nOption: %@\nMessageID: %i\nToken: %i\nPayload: '%@'", dateString, typeString, codeString, optString, coapMessage.messageID, coapMessage.token, [NSString stringFromHexString:coapMessage.payload] );
+    NSLog(@"\nMessage: %@\n\nType: %@\nResponseCode: %@\nOption: %@\nMessageID: %i\nToken: %i\nPayload: '%@'", dateString, typeString, codeString, optString, coapMessage.messageID, coapMessage.token, coapMessage.payload);
     NSLog(@"---------------------------");
     NSLog(@"---------------------------");
     
     // did you receive the expected message? then it is recommended to use the closeTransmission method
-    // unless more messages are expected, like e.g. block message, or observe.
+    // unless more messages are expected, like e.g. block message, or observe messages.
     
     //          [iTrans closeTransmission];
 

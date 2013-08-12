@@ -148,9 +148,20 @@
                 return nil;
             }
             
-            NSString *optVal = [hexString substringWithRange:NSMakeRange(optionIndex + optionIndexOffset, optionLength * 2)];            
+            uint newOptionNumber = optionDelta + extendedDelta + prevOptionDelta;
+            NSString *optVal;            
             
-            [cO addOption:optionDelta + extendedDelta + prevOptionDelta withValue:optVal];
+            if (newOptionNumber == BLOCK2 || newOptionNumber == ETAG || newOptionNumber == IF_MATCH) {
+                optVal = [hexString substringWithRange:NSMakeRange(optionIndex + optionIndexOffset, optionLength * 2)];
+            }
+            else if (newOptionNumber == URI_PORT || newOptionNumber == CONTENT_FORMAT || newOptionNumber == MAX_AGE || newOptionNumber == ACCEPT || newOptionNumber == SIZE1 || newOptionNumber == OBSERVE) {
+                optVal = [NSString stringWithFormat:@"%i", (int)strtol([[hexString substringWithRange:NSMakeRange(optionIndex + optionIndexOffset, optionLength * 2)] UTF8String], NULL, 16)];
+            }
+            else {
+                optVal = [NSString stringFromHexString:[[hexString substringWithRange:NSMakeRange(optionIndex + optionIndexOffset, optionLength * 2)] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+            }
+            
+            [cO addOption:newOptionNumber withValue:optVal];
             
             prevOptionDelta += optionDelta + extendedDelta;
             optionIndex += optionIndexOffset + optionLength * 2;
@@ -163,7 +174,7 @@
     
     //Payload, first check if payloadmarker exists
     if (payloadStartIndex + 2 < [hexString length]) {
-        cO.payload = [hexString substringFromIndex:payloadStartIndex + 2];
+        cO.payload = [[NSString stringFromHexString:[hexString substringFromIndex:payloadStartIndex + 2]] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     }
     
     return cO;
@@ -225,8 +236,7 @@
                 length = [valueForKey length] / 2;
             }
             else {
-                valueForKey = [valueArray objectAtIndex:i];
-                
+                valueForKey = [[valueArray objectAtIndex:i] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
                 length = [valueForKey length];
             }
             
