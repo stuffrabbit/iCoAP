@@ -6,7 +6,6 @@
 
 
 #import "ExampleViewController.h"
-#import "NSString+hex.h"
 
 @interface ExampleViewController ()
 
@@ -41,7 +40,7 @@
 - (void)iCoAPTransmission:(iCoAPTransmission *)transmission didReceiveCoAPMessage:(iCoAPMessage *)coapMessage {
     //If empty ACK Message received: Indicator for Seperate Message and don't hide activity indicator
 
-    if (coapMessage.isFinal) {
+    if (!iTrans.isMessageInTransmission) {
         self.activityIndicator.hidden = YES;
     }
     
@@ -85,13 +84,20 @@
 
 
 }
-
-- (void)iCoAPTransmission:(iCoAPTransmission *)transmission didFailWithErrorCode:(iCoAPTransmissionErrorCode)error {
-    if (error == UDP_SOCKET_ERROR || error == NO_RESPONSE_EXPECTED) {
-        [self.textView setText:@"Failed..."];
+- (void)iCoAPTransmission:(iCoAPTransmission *)transmission didFailWithError:(NSError *)error {
+    //Handle Errors
+    if (error.code == UDP_SOCKET_ERROR || error.code == NO_RESPONSE_EXPECTED) {
+        [self.textView setText:[NSString stringWithFormat:@"Failed: %@\n\n%@", [error localizedDescription], self.textView.text]];
         self.activityIndicator.hidden = YES;
     }
 }
+
+
+- (void)iCoAPTransmission:(iCoAPTransmission *)transmission didRetransmitCoAPMessage:(iCoAPMessage *)coapMessage number:(uint)number finalRetransmission:(BOOL)final {
+    //Received retransmission notification
+    [self.textView setText:[NSString stringWithFormat:@"Retransmission: %i\n\n%@", number, self.textView.text]];
+}
+
 
 #pragma mark - Text Field Delegate
 
@@ -117,13 +123,13 @@
     // and set all properties manually.
     // coap.me is a test coap server you can use. Note that it might be offline from time to time.
     if (iTrans == nil) {
-        iTrans = [[iCoAPTransmission alloc] initWithRegistrationAndSendRequestWithCoAPMessage:cO toHost:@"4.coap.me" port:5683 delegate:self];
+        iTrans = [[iCoAPTransmission alloc] initAndSendRequestWithCoAPMessage:cO toHost:@"4.coap.me" port:5683 delegate:self];
     }
     else {
         // Make sure to always close transmission before you send a new message. If you want to sent multiple message
         // simultaneously simply initialize a new iCoAPTransmission object
         [iTrans closeTransmission];
-        [iTrans registerAndSendRequestWithCoAPMessage:cO toHost:@"4.coap.me" port:5683];
+        [iTrans sendRequestWithCoAPMessage:cO toHost:@"4.coap.me" port:5683];
     }
 
     self.activityIndicator.hidden = NO;

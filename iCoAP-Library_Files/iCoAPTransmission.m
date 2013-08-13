@@ -11,15 +11,13 @@
 @interface iCoAPTransmission ()
 - (BOOL)setupUdpSocket;
 - (void)udpSocket:(GCDAsyncUdpSocket *)sock didReceiveData:(NSData *)data fromAddress:(NSData *)address withFilterContext:(id)filterContext;
-
+- (void)udpSocket:(GCDAsyncUdpSocket *)sock didNotSendDataWithTag:(long)tag dueToError:(NSError *)error;
 - (void)noResponseExpected;
 - (void)sendDidReceiveMessageToDelegateWithCoAPMessage:(iCoAPMessage *)coapMessage;
-- (void)sendFailWithErrorToDelegateWithErrorCode:(iCoAPTransmissionErrorCode)error;
-
+- (void)sendDidRetransmitMessageToDelegateWithCoAPMessage:(iCoAPMessage *)coapMessage;
+- (void)sendFailWithErrorToDelegateWithError:(NSError *)error;
 - (NSMutableData *)getHexDataFromString:(NSString *)string;
-
 - (void)sendCircumstantialResponseWithMessageID:(uint)messageID token:(uint)token type:(Type)type toAddress:(NSData *)address;
-
 - (void)startSending;
 - (void)performTransmissionCycle;
 - (void)sendCoAPMessage;
@@ -30,10 +28,10 @@
 
 #pragma mark - Init
 
-- (id)initWithRegistrationAndSendRequestWithCoAPMessage:(iCoAPMessage *)cO toHost:(NSString* )host port:(uint)port delegate:(id)delegate {
+- (id)initAndSendRequestWithCoAPMessage:(iCoAPMessage *)cO toHost:(NSString* )host port:(uint)port delegate:(id)delegate {
     if (self = [super init]) {
         self.delegate = delegate;
-        [self registerAndSendRequestWithCoAPMessage:cO toHost:host port:port];
+        [self sendRequestWithCoAPMessage:cO toHost:host port:port];
     }
     return self;
 }
@@ -174,9 +172,16 @@
     
     //Payload, first check if payloadmarker exists
     if (payloadStartIndex + 2 < [hexString length]) {
+        if ([cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", CONTENT_FORMAT]] != nil) {
+            NSMutableArray *values = [cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", CONTENT_FORMAT]];
+            if ([[values objectAtIndex:0] intValue] == 42 || [[values objectAtIndex:0] intValue] == 47) {
+                cO.payload = [hexString substringFromIndex:payloadStartIndex + 2];
+                return cO;
+            }
+        }
         cO.payload = [[NSString stringFromHexString:[hexString substringFromIndex:payloadStartIndex + 2]] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+
     }
-    
     return cO;
 }
 
@@ -236,7 +241,7 @@
                 length = [valueForKey length] / 2;
             }
             else {
-                valueForKey = [[valueArray objectAtIndex:i] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+                valueForKey = [valueArray objectAtIndex:i];
                 length = [valueForKey length];
             }
             
@@ -319,8 +324,8 @@
         [maxWaitTimer invalidate];
     }
 
-    if (cO.type == ACKNOWLEDGMENT && cO.code == 0) {
-        cO.isFinal = NO;
+    if (!(cO.type == ACKNOWLEDGMENT && cO.code == EMPTY)) {
+        _isMessageInTransmission = NO;
     }
     
     //Separate Response / Observe: Send ACK
@@ -361,7 +366,9 @@
             
             pendingCoAPMessageInTransmission = blockObject;
             [self startSending];
-            cO.isFinal = NO;
+        }
+        else {
+            _isMessageInTransmission = NO;
         }
     }
     
@@ -377,13 +384,21 @@
         //No Observe Option: Sending object to delegate
         [self sendDidReceiveMessageToDelegateWithCoAPMessage:cO];
     }
-
 }
+
+- (void)udpSocket:(GCDAsyncUdpSocket *)sock didNotSendDataWithTag:(long)tag dueToError:(NSError *)error {
+    [self closeTransmission];
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"UDP Socket Error" forKey:NSLocalizedDescriptionKey];
+    [self sendFailWithErrorToDelegateWithError:[[NSError alloc] initWithDomain:kiCoAPErrorDomain code:UDP_SOCKET_ERROR userInfo:userInfo]];
+}
+
 
 #pragma mark - Delegate Method Calls
 
 - (void)noResponseExpected {
-    [self sendFailWithErrorToDelegateWithErrorCode:NO_RESPONSE_EXPECTED];
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"No Response expected for recently sent CoAP Message" forKey:NSLocalizedDescriptionKey];
+
+    [self sendFailWithErrorToDelegateWithError:[[NSError alloc] initWithDomain:kiCoAPErrorDomain code:NO_RESPONSE_EXPECTED userInfo:userInfo]];
     [self closeTransmission];
 }
 
@@ -393,9 +408,17 @@
     }
 }
 
-- (void)sendFailWithErrorToDelegateWithErrorCode:(iCoAPTransmissionErrorCode)error {
-    if ([self.delegate respondsToSelector:@selector(iCoAPTransmission:didFailWithErrorCode:)]) {
-        [self.delegate iCoAPTransmission:self didFailWithErrorCode:error];
+- (void)sendDidRetransmitMessageToDelegateWithCoAPMessage:(iCoAPMessage *)coapMessage {
+    if ([self.delegate respondsToSelector:@selector(iCoAPTransmission:didRetransmitCoAPMessage:number:finalRetransmission:)]) {
+        retransmissionCounter == kMAX_RETRANSMIT ?
+        [self.delegate iCoAPTransmission:self didRetransmitCoAPMessage:pendingCoAPMessageInTransmission number:retransmissionCounter finalRetransmission:YES] :
+        [self.delegate iCoAPTransmission:self didRetransmitCoAPMessage:pendingCoAPMessageInTransmission number:retransmissionCounter finalRetransmission:NO];
+    }
+}
+
+- (void)sendFailWithErrorToDelegateWithError:(NSError *)error {
+    if ([self.delegate respondsToSelector:@selector(iCoAPTransmission:didFailWithError:)]) {
+        [self.delegate iCoAPTransmission:self didFailWithError:error];
     }
 }
 
@@ -433,22 +456,23 @@
     udpSocketTag++;
 }
 
-- (void)registerAndSendRequestWithCoAPMessage:(iCoAPMessage *)cO toHost:(NSString *)host port:(uint)port {
-    cO.messageID = arc4random() % 65535;
+- (void)sendRequestWithCoAPMessage:(iCoAPMessage *)cO toHost:(NSString *)host port:(uint)port {
+    cO.messageID = arc4random() % 65536;
     
     if ([cO isTokenRequested]) {
-        cO.token = 1 + arc4random() % 65535;
+        cO.token = 1 + arc4random() % 65536;
     }
     
     cO.isRequest = YES;
     cO.host = host;
     cO.port = port;
-
     pendingCoAPMessageInTransmission = cO;
     
     if (self.udpSocket == nil) {
         if (![self setupUdpSocket]) {
-            [self sendFailWithErrorToDelegateWithErrorCode:UDP_SOCKET_ERROR];
+            NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"Failed to setup UDP Socket" forKey:NSLocalizedDescriptionKey];
+
+            [self sendFailWithErrorToDelegateWithError:[[NSError alloc] initWithDomain:kiCoAPErrorDomain code:UDP_SOCKET_ERROR userInfo:userInfo]];
             return;
         }
     }
@@ -461,6 +485,7 @@
     [maxWaitTimer invalidate];
     isObserveCancelled = NO;
     observeOptionValue = 0;
+    _isMessageInTransmission = YES;
     
     pendingCoAPMessageInTransmission.timestamp = [NSDate date];
     
@@ -477,13 +502,13 @@
 
 - (void)performTransmissionCycle {
     [self sendCoAPMessage];
-    
-    if (retransmissionCounter == kMAX_RETRANSMIT) {
-        [self sendFailWithErrorToDelegateWithErrorCode:MAX_RETRANSMIT_REACHED];
+    if (retransmissionCounter != 0) {
+        [self sendDidRetransmitMessageToDelegateWithCoAPMessage:pendingCoAPMessageInTransmission];
     }
-    else {
+    
+    if (retransmissionCounter != kMAX_RETRANSMIT) {
         double timeout = kACK_TIMEOUT * pow(2.0, retransmissionCounter) * kACK_RANDOM_FACTOR;
-        sendTimer = [NSTimer scheduledTimerWithTimeInterval:timeout target:self selector:@selector(performTransmissionCycle) userInfo:nil repeats:NO];        
+        sendTimer = [NSTimer scheduledTimerWithTimeInterval:timeout target:self selector:@selector(performTransmissionCycle) userInfo:nil repeats:NO];
         retransmissionCounter++;
     }
 }
@@ -500,6 +525,7 @@
     [sendTimer invalidate];
     [maxWaitTimer invalidate];
     pendingCoAPMessageInTransmission = nil;
+    _isMessageInTransmission = NO;
 }
 
 @end

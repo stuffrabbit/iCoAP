@@ -13,7 +13,6 @@
     self = [super init];
     if (self) {
         self.optionDict = [[NSMutableDictionary alloc] init];
-        self.isFinal = YES;
     }
     return self;
 }

@@ -44,11 +44,10 @@
 #define kACK_RANDOM_FACTOR                  1.5
 #define kMAX_TRANSMIT_WAIT                  93.0
 
-
+#define kiCoAPErrorDomain                   @"iCoAPErrorDomain"
 
 
 typedef enum {
-    MAX_RETRANSMIT_REACHED,     //  The pending iCoAPMessage will not be retransmitted
     NO_RESPONSE_EXPECTED,       //  MAX_WAIT time expired and no response is expected
     UDP_SOCKET_ERROR            //  UDP Socket setup/bind failed
 }iCoAPTransmissionErrorCode;
@@ -97,7 +96,15 @@ typedef enum {
  */
 @property (readwrite, nonatomic) uint udpPort;
 
-
+/*
+ *  'isMessageInTransmission':
+ *  Indicates if a iCoAPMessage is currently in transmission and 
+ *  if a successive message is expected.
+ *  E.g. no response was is received yet, or an empty ACK message indicated a separate response,
+ *  or a Block2 message with more-bit set indicated successive
+ *  Block2 messages.
+ */
+ @property (readonly, nonatomic) BOOL isMessageInTransmission;
 
 
 
@@ -114,17 +121,17 @@ typedef enum {
 
 
 /*
- *  'initWithRegistrationAndSendRequestWithCoAPMessage:toHost:port:delegate':
+ *  'initAndSendRequestWithCoAPMessage:toHost:port:delegate':
  *   Initializer with embedded message sending.
  */
-- (id)initWithRegistrationAndSendRequestWithCoAPMessage:(iCoAPMessage *)cO toHost:(NSString* )host port:(uint)port delegate:(id)delegate;
+- (id)initAndSendRequestWithCoAPMessage:(iCoAPMessage *)cO toHost:(NSString* )host port:(uint)port delegate:(id)delegate;
 
 /*
- *  'registerAndSendRequestWithCoAPMessage:toHost:port':
+ *  'sendRequestWithCoAPMessage:toHost:port':
  *  Starts the sending of the given iCoAPMessage to the destination 'host' and
  *  'port'.
  */
-- (void)registerAndSendRequestWithCoAPMessage:(iCoAPMessage *)cO toHost:(NSString *)host port:(uint)port ;
+- (void)sendRequestWithCoAPMessage:(iCoAPMessage *)cO toHost:(NSString *)host port:(uint)port ;
 
 /*
  *  'cancelObserve':
@@ -171,16 +178,24 @@ typedef enum {
 @optional
 
 /*
- *  'iCoAPTransmission:didFailWithErrorCode:':
- *  Informs the delegate that an 'iCoAPTransmissionErrorCode' has occured.
- */
-- (void)iCoAPTransmission:(iCoAPTransmission *)transmission didFailWithErrorCode:(iCoAPTransmissionErrorCode)error;
-
-/*
  *  'iCoAPTransmission:didReceiveCoAPMessage:':
  *  Informs the delegate that a valid iCoAPMessage was received.
  */
 - (void)iCoAPTransmission:(iCoAPTransmission *)transmission didReceiveCoAPMessage:(iCoAPMessage *)coapMessage;
 
+/*
+ *  'iCoAPTransmission:didFailWithError:':
+ *  Informs the delegate that an error has occured. The error code matches the defined
+ *  'iCoAPTransmissionErrorCode'.
+ */
+- (void)iCoAPTransmission:(iCoAPTransmission *)transmission didFailWithError:(NSError *)error;
+
+/*
+ *  'iCoAPTransmission:didRetransmitCoAPMessage:number:finalRetransmission:':
+ *  Informs the delegate that the pending iCoAPMessage is about to be retransmitted.
+ *  'final' indicates whether this was the last retransmission (MAX_RETRANSMIT reached), 
+ *  whereas 'number' represents the number of performed retransmissions.
+ */
+- (void)iCoAPTransmission:(iCoAPTransmission *)transmission didRetransmitCoAPMessage:(iCoAPMessage *)coapMessage number:(uint)number finalRetransmission:(BOOL)final;
 
 @end
