@@ -36,14 +36,14 @@ Options are saved in an NSMutable Dictionary, where each dictionary "key" repres
 
 ```objc 
 iCoAPTransmission *transmission = 
-          [[iCoAPTransmission alloc] initWithRegistrationAndSendRequestWithCoAPMessage:cO 
+          [[iCoAPTransmission alloc] initAndSendRequestWithCoAPMessage:cO 
                                      toHost:@"4.coap.me" 
                                      port:5683 
                                      delegate:self];
 ```
   Alternatively you can use the standard `init` method, alter properties (optional, but don't forget to set the delegate) and send manually like:
 ```objc 
-[transmission registerAndSendRequestWithCoAPMessage:cO toHost:@"4.coap.me" port:5683];
+[transmission sendRequestWithCoAPMessage:cO toHost:@"4.coap.me" port:5683];
 ```
 
 * Implement the delegate methods from the provided `iCoAPTransmissionDelegate` protocol.
