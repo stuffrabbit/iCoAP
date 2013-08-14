@@ -12,6 +12,7 @@
 - (BOOL)setupUdpSocket;
 - (void)udpSocket:(GCDAsyncUdpSocket *)sock didReceiveData:(NSData *)data fromAddress:(NSData *)address withFilterContext:(id)filterContext;
 - (void)udpSocket:(GCDAsyncUdpSocket *)sock didNotSendDataWithTag:(long)tag dueToError:(NSError *)error;
+- (void)udpSocketDidClose:(GCDAsyncUdpSocket *)sock withError:(NSError *)error;
 - (void)noResponseExpected;
 - (void)sendDidReceiveMessageToDelegateWithCoAPMessage:(iCoAPMessage *)coapMessage;
 - (void)sendDidRetransmitMessageToDelegateWithCoAPMessage:(iCoAPMessage *)coapMessage;
@@ -388,10 +389,15 @@
 
 - (void)udpSocket:(GCDAsyncUdpSocket *)sock didNotSendDataWithTag:(long)tag dueToError:(NSError *)error {
     [self closeTransmission];
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"UDP Socket Error" forKey:NSLocalizedDescriptionKey];
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"UDP Socket could not send data." forKey:NSLocalizedDescriptionKey];
     [self sendFailWithErrorToDelegateWithError:[[NSError alloc] initWithDomain:kiCoAPErrorDomain code:UDP_SOCKET_ERROR userInfo:userInfo]];
 }
 
+- (void)udpSocketDidClose:(GCDAsyncUdpSocket *)sock withError:(NSError *)error {
+    [self closeTransmission];
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"UDP Socket Closed" forKey:NSLocalizedDescriptionKey];
+    [self sendFailWithErrorToDelegateWithError:[[NSError alloc] initWithDomain:kiCoAPErrorDomain code:UDP_SOCKET_ERROR userInfo:userInfo]];
+}
 
 #pragma mark - Delegate Method Calls
 
