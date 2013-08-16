@@ -18,7 +18,7 @@
 - (void)sendDidRetransmitMessageToDelegateWithCoAPMessage:(iCoAPMessage *)coapMessage;
 - (void)sendFailWithErrorToDelegateWithError:(NSError *)error;
 - (NSMutableData *)getHexDataFromString:(NSString *)string;
-- (void)sendCircumstantialResponseWithMessageID:(uint)messageID token:(uint)token type:(Type)type toAddress:(NSData *)address;
+- (void)sendCircumstantialResponseWithMessageID:(uint)messageID token:(uint)token type:(CoAPType)type toAddress:(NSData *)address;
 - (void)startSending;
 - (void)performTransmissionCycle;
 - (void)sendCoAPMessage;
@@ -175,13 +175,12 @@
     if (payloadStartIndex + 2 < [hexString length]) {
         if ([cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", CONTENT_FORMAT]] != nil) {
             NSMutableArray *values = [cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", CONTENT_FORMAT]];
-            if ([[values objectAtIndex:0] intValue] == 42 || [[values objectAtIndex:0] intValue] == 47) {
+            if ([[values objectAtIndex:0] intValue] == OCTET_STREAM || [[values objectAtIndex:0] intValue] == EXI) {
                 cO.payload = [hexString substringFromIndex:payloadStartIndex + 2];
                 return cO;
             }
         }
         cO.payload = [[NSString stringFromHexString:[hexString substringFromIndex:payloadStartIndex + 2]] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-
     }
     return cO;
 }
@@ -290,6 +289,13 @@
     
     //Payload encoded to UTF-8
     if ([cO.payload length] > 0) {
+        if ([cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", CONTENT_FORMAT]] != nil) {
+            NSMutableArray *values = [cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", CONTENT_FORMAT]];
+            if ([[values objectAtIndex:0] intValue] == OCTET_STREAM || [[values objectAtIndex:0] intValue] == EXI) {
+                [final appendString:[NSString stringWithFormat:@"%02X%@", 255, cO.payload]];
+                return [self getHexDataFromString:final];
+            }
+        }
         [final appendString:[NSString stringWithFormat:@"%02X%@", 255, [NSString hexStringFromString:cO.payload]]];
     }
 
@@ -451,7 +457,7 @@
 
 #pragma mark - Send Methods
 
-- (void)sendCircumstantialResponseWithMessageID:(uint)messageID token:(uint)token type:(Type)type toAddress:(NSData *)address {
+- (void)sendCircumstantialResponseWithMessageID:(uint)messageID token:(uint)token type:(CoAPType)type toAddress:(NSData *)address {
     iCoAPMessage *ackObject = [[iCoAPMessage alloc] init];
     ackObject.isRequest = NO;
     ackObject.type = type;

@@ -24,15 +24,15 @@ typedef enum {
     CONFIRMABLE = 4,
     NON_CONFIRMABLE = 5,
     ACKNOWLEDGMENT = 6,
-    RESET = 7,
-} Type;
+    RESET = 7
+} CoAPType;
 
 typedef enum {
     GET = 1,
     POST = 2,
     PUT = 3,
-    DELETE = 4,
-} RequestMethod;
+    DELETE = 4
+} CoAPRequestMethod;
 
 typedef enum {
     EMPTY = 0,
@@ -56,8 +56,8 @@ typedef enum {
     BAD_GATEWAY = 162,
     SERVICE_UNAVAILABLE = 163,
     GATEWAY_TIMEOUT = 164,
-    PROXYING_NOT_SUPPORTED = 165,
-} ResponseCode;
+    PROXYING_NOT_SUPPORTED = 165
+} CoAPResponseCode;
 
 typedef enum {
     IF_MATCH = 1,
@@ -78,8 +78,16 @@ typedef enum {
     PROXY_URI = 35,
     PROXY_SCHEME = 39,
     SIZE1 = 60
-} Option;
+} CoAPOption;
 
+typedef enum {
+    PLAIN = 0,
+    LINK_FORMAT = 40,
+    XML = 41,
+    OCTET_STREAM = 42,
+    EXI = 47,
+    JSON = 50
+}SupportedContentFormats;
 
 
 @interface iCoAPMessage : NSObject

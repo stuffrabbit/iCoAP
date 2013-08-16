@@ -121,14 +121,11 @@
     
     // finally initialize the iCoAPTransmission Object. You can alternatively use the standard 'init' method
     // and set all properties manually.
-    // coap.me is a test coap server you can use. Note that it might be offline from time to time.
+    // coap.me is a test coap server you can use for testing. Note that it might be offline from time to time.
     if (iTrans == nil) {
         iTrans = [[iCoAPTransmission alloc] initAndSendRequestWithCoAPMessage:cO toHost:@"4.coap.me" port:5683 delegate:self];
     }
     else {
-        // Make sure to always close transmission before you send a new message. If you want to sent multiple message
-        // simultaneously simply initialize a new iCoAPTransmission object
-        [iTrans closeTransmission];
         [iTrans sendRequestWithCoAPMessage:cO toHost:@"4.coap.me" port:5683];
     }
 
