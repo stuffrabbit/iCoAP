@@ -71,7 +71,7 @@ typedef enum {
     CONTENT_FORMAT = 12,
     MAX_AGE = 14,
     URI_QUERY = 15,
-    ACCEPT = 16,
+    ACCEPT = 17,
     LOCATION_QUERY = 20,
     BLOCK2 = 23,
     BLOCK1 = 27,
