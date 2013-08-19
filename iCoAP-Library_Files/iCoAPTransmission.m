@@ -356,7 +356,13 @@
             blockObject.token = pendingCoAPMessageInTransmission.token;
             blockObject.host = pendingCoAPMessageInTransmission.host;
             blockObject.port = pendingCoAPMessageInTransmission.port;
-
+            blockObject.optionDict =  [[NSMutableDictionary alloc] init];
+            for (id key in pendingCoAPMessageInTransmission.optionDict) {
+                if (![key isEqualToString:[NSString stringWithFormat:@"%i", BLOCK2]]) {
+                    [blockObject.optionDict setValue:[[NSMutableArray alloc] initWithArray:[pendingCoAPMessageInTransmission.optionDict valueForKey:key]] forKey:key];
+                }
+            }
+            
             NSString *newBlockValue;
             
             if (blockNum >= 4095 ) {
