@@ -6,10 +6,10 @@
 
 
 #import <UIKit/UIKit.h>
-#import "iCoAPTransmission.h"
+#import "ICoAPExchange.h"
 
-@interface ExampleViewController : UIViewController<iCoAPTransmissionDelegate, UITextFieldDelegate> {
-    iCoAPTransmission *iTrans;
+@interface ExampleViewController : UIViewController<ICoAPExchangeDelegate, UITextFieldDelegate> {
+    ICoAPExchange *iExchange;
     int count;
     
     NSDateFormatter *completeDateFormat;

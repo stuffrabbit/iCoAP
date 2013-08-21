@@ -1,5 +1,5 @@
 //
-//  iCoAPMessage.h
+//  ICoAPMessage.h
 //  iCoAP
 //
 //  Created by Wojtek Kordylewski on 18.06.13.
@@ -87,10 +87,10 @@ typedef enum {
     OCTET_STREAM = 42,
     EXI = 47,
     JSON = 50
-}SupportedContentFormats;
+} SupportedContentFormats;
 
 
-@interface iCoAPMessage : NSObject
+@interface ICoAPMessage : NSObject
 
 
 
@@ -120,7 +120,7 @@ typedef enum {
 /*
  * 'isTokenRequested':
  *  If set to YES, the object will be assigned a random token 
- *  upon passing it to a iCoAPTransmission object
+ *  upon passing it to a ICoAPExchange object
  */
 @property (readwrite, nonatomic) BOOL isTokenRequested;
 
@@ -153,7 +153,7 @@ typedef enum {
 /*
  *  'token':
  *  the CoAP Message Token. Is set upon passing it to a
- *  iCoAPTransmission object, if 'isTokenRequired is set to YES.
+ *  ICoAPExchange object, if 'isTokenRequired is set to YES.
  */
 @property (readwrite, nonatomic) uint token;
 
@@ -178,7 +178,7 @@ typedef enum {
 
 /*
  *  'timestamp':
- *  The timestamp, the iCoAPMessage is sent or received.
+ *  The timestamp, the ICoAPMessage is sent or received.
  */
 @property (strong, nonatomic) NSDate *timestamp;
 

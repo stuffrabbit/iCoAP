@@ -1,12 +1,12 @@
 //
-//  iCoAPMessage.m
+//  ICoAPMessage.m
 //  iCoAP
 //
 //  Created by Wojtek Kordylewski on 18.06.13.
 
-#import "iCoAPMessage.h"
+#import "ICoAPMessage.h"
 
-@implementation iCoAPMessage
+@implementation ICoAPMessage
 
 
 - (id)init {

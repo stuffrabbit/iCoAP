@@ -19,7 +19,7 @@
 		932ADE1A17A2FABD00EB05AB /* MainStoryboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 932ADE1817A2FABD00EB05AB /* MainStoryboard.storyboard */; };
 		932ADE2517A3136100EB05AB /* ExampleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 932ADE2417A3136100EB05AB /* ExampleViewController.m */; };
 		932ADE2D17A3142100EB05AB /* iCoAPMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 932ADE2817A3142100EB05AB /* iCoAPMessage.m */; };
-		932ADE2E17A3142100EB05AB /* iCoAPTransmission.m in Sources */ = {isa = PBXBuildFile; fileRef = 932ADE2A17A3142100EB05AB /* iCoAPTransmission.m */; };
+		932ADE2E17A3142100EB05AB /* ICoAPExchange.m in Sources */ = {isa = PBXBuildFile; fileRef = 932ADE2A17A3142100EB05AB /* ICoAPExchange.m */; };
 		932ADE2F17A3142100EB05AB /* NSString+hex.m in Sources */ = {isa = PBXBuildFile; fileRef = 932ADE2C17A3142100EB05AB /* NSString+hex.m */; };
 		932ADE3217A3167900EB05AB /* GCDAsyncUdpSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 932ADE3117A3167900EB05AB /* GCDAsyncUdpSocket.m */; };
 /* End PBXBuildFile section */
@@ -43,8 +43,8 @@
 		932ADE2417A3136100EB05AB /* ExampleViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ExampleViewController.m; sourceTree = "<group>"; };
 		932ADE2717A3142100EB05AB /* iCoAPMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iCoAPMessage.h; sourceTree = "<group>"; };
 		932ADE2817A3142100EB05AB /* iCoAPMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iCoAPMessage.m; sourceTree = "<group>"; };
-		932ADE2917A3142100EB05AB /* iCoAPTransmission.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iCoAPTransmission.h; sourceTree = "<group>"; };
-		932ADE2A17A3142100EB05AB /* iCoAPTransmission.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iCoAPTransmission.m; sourceTree = "<group>"; };
+		932ADE2917A3142100EB05AB /* ICoAPExchange.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ICoAPExchange.h; sourceTree = "<group>"; };
+		932ADE2A17A3142100EB05AB /* ICoAPExchange.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ICoAPExchange.m; sourceTree = "<group>"; };
 		932ADE2B17A3142100EB05AB /* NSString+hex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+hex.h"; sourceTree = "<group>"; };
 		932ADE2C17A3142100EB05AB /* NSString+hex.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+hex.m"; sourceTree = "<group>"; };
 		932ADE3017A3167900EB05AB /* GCDAsyncUdpSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDAsyncUdpSocket.h; sourceTree = "<group>"; };
@@ -125,8 +125,8 @@
 			children = (
 				932ADE2717A3142100EB05AB /* iCoAPMessage.h */,
 				932ADE2817A3142100EB05AB /* iCoAPMessage.m */,
-				932ADE2917A3142100EB05AB /* iCoAPTransmission.h */,
-				932ADE2A17A3142100EB05AB /* iCoAPTransmission.m */,
+				932ADE2917A3142100EB05AB /* ICoAPExchange.h */,
+				932ADE2A17A3142100EB05AB /* ICoAPExchange.m */,
 				932ADE2B17A3142100EB05AB /* NSString+hex.h */,
 				932ADE2C17A3142100EB05AB /* NSString+hex.m */,
 				932ADE3017A3167900EB05AB /* GCDAsyncUdpSocket.h */,
@@ -205,7 +205,7 @@
 				932ADE1117A2FABD00EB05AB /* AppDelegate.m in Sources */,
 				932ADE2517A3136100EB05AB /* ExampleViewController.m in Sources */,
 				932ADE2D17A3142100EB05AB /* iCoAPMessage.m in Sources */,
-				932ADE2E17A3142100EB05AB /* iCoAPTransmission.m in Sources */,
+				932ADE2E17A3142100EB05AB /* ICoAPExchange.m in Sources */,
 				932ADE2F17A3142100EB05AB /* NSString+hex.m in Sources */,
 				932ADE3217A3167900EB05AB /* GCDAsyncUdpSocket.m in Sources */,
 			);
@@ -330,6 +330,7 @@
 				932ADE2217A2FABD00EB05AB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

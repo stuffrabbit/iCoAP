@@ -35,12 +35,12 @@
     // Dispose of any resources that can be recreated.
 }
 
-#pragma mark - iCoAP Transmission Delegate
+#pragma mark - iCoAP Exchange Delegate
 
-- (void)iCoAPTransmission:(iCoAPTransmission *)transmission didReceiveCoAPMessage:(iCoAPMessage *)coapMessage {
+- (void)iCoAPExchange:(ICoAPExchange *)exchange didReceiveCoAPMessage:(ICoAPMessage *)coapMessage {
     //If empty ACK Message received: Indicator for Seperate Message and don't hide activity indicator
 
-    if (!iTrans.isMessageInTransmission) {
+    if (!exchange.isMessageInTransmission) {
         self.activityIndicator.hidden = YES;
     }
     
@@ -68,7 +68,7 @@
     NSLog(@"---------------------------");
     
 
-    if (transmission == iTrans) {
+    if (exchange == iExchange) {
         [self.textView setText:[NSString stringWithFormat:@"(%i) Message from: %@\n\nType: %@\nResponseCode: %@\n%@\nMessageID: %i\nToken: %i\nPayload: '%@'\n\n%@", count, dateString, typeString, codeString, optString , coapMessage.messageID, coapMessage.token, coapMessage.payload, self.textView.text]];
         
     }
@@ -80,11 +80,11 @@
     // did you receive the expected message? then it is recommended to use the closeTransmission method
     // unless more messages are expected, like e.g. block message, or observe messages.
     
-    //          [iTrans closeTransmission];
+    //          [iExchange closeTransmission];
 
 
 }
-- (void)iCoAPTransmission:(iCoAPTransmission *)transmission didFailWithError:(NSError *)error {
+- (void)iCoAPExchange:(ICoAPExchange *)exchange didFailWithError:(NSError *)error {
     //Handle Errors
     if (error.code == UDP_SOCKET_ERROR || error.code == NO_RESPONSE_EXPECTED) {
         [self.textView setText:[NSString stringWithFormat:@"Failed: %@\n\n%@", [error localizedDescription], self.textView.text]];
@@ -93,7 +93,7 @@
 }
 
 
-- (void)iCoAPTransmission:(iCoAPTransmission *)transmission didRetransmitCoAPMessage:(iCoAPMessage *)coapMessage number:(uint)number finalRetransmission:(BOOL)final {
+- (void)iCoAPExchange:(ICoAPExchange *)exchange didRetransmitCoAPMessage:(ICoAPMessage *)coapMessage number:(uint)number finalRetransmission:(BOOL)final {
     //Received retransmission notification
     [self.textView setText:[NSString stringWithFormat:@"Retransmission: %i\n\n%@", number, self.textView.text]];
 }
@@ -110,23 +110,23 @@
 #pragma mark - Action
 
 - (IBAction)onTapSend:(id)sender {
-    // Create iCoAPMessage first. You can alternatively use the standard 'init' method
+    // Create ICoAPMessage first. You can alternatively use the standard 'init' method
     // and set all properties manually
-    iCoAPMessage *cO = [[iCoAPMessage alloc] initAsRequestConfirmable:YES requestMethod:GET sendToken:YES payload:@""];
+    ICoAPMessage *cO = [[ICoAPMessage alloc] initAsRequestConfirmable:YES requestMethod:GET sendToken:YES payload:@""];
     [cO addOption:URI_PATH withValue:self.textField.text];
 
     // add more Options here if required e.g. observe
     // [cO addOption:OBSERVE withValue:@""];
     
     
-    // finally initialize the iCoAPTransmission Object. You can alternatively use the standard 'init' method
+    // finally initialize the ICoAPExchange Object. You can alternatively use the standard 'init' method
     // and set all properties manually.
     // coap.me is a test coap server you can use for testing. Note that it might be offline from time to time.
-    if (iTrans == nil) {
-        iTrans = [[iCoAPTransmission alloc] initAndSendRequestWithCoAPMessage:cO toHost:@"4.coap.me" port:5683 delegate:self];
+    if (iExchange == nil) {
+        iExchange = [[ICoAPExchange alloc] initAndSendRequestWithCoAPMessage:cO toHost:@"4.coap.me" port:5683 delegate:self];
     }
     else {
-        [iTrans sendRequestWithCoAPMessage:cO toHost:@"4.coap.me" port:5683];
+        [iExchange sendRequestWithCoAPMessage:cO toHost:@"4.coap.me" port:5683];
     }
 
     self.activityIndicator.hidden = NO;
@@ -175,7 +175,7 @@
     }
 }
 
-- (NSString *)getTypeDisplayStringForCoAPObject:(iCoAPMessage *)cO {
+- (NSString *)getTypeDisplayStringForCoAPObject:(ICoAPMessage *)cO {
     switch (cO.type) {
         case CONFIRMABLE:
             return @"Confirmable (CON)";
@@ -190,7 +190,7 @@
     }
 }
 
-- (NSString *)getCodeDisplayStringForCoAPObject:(iCoAPMessage *)cO {
+- (NSString *)getCodeDisplayStringForCoAPObject:(ICoAPMessage *)cO {
     switch (cO.code) {
         case EMPTY:
             return @"Empty";
