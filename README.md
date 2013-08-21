@@ -13,11 +13,11 @@ Getting Started
 =====
 
 * Copy all files included in the `iCoAP-Library_Files` folder to your X-Code project.
-* Import the `iCoAPTransmission.h` to your Objective-C class (e.g. a standard ViewController).
-* Create an ` iCoAPMessage` object  e.g. like: 
+* Import the `ICoAPExchange.h` to your Objective-C class (e.g. a standard ViewController).
+* Create an ` ICoAPMessage` object  e.g. like: 
 
 ```objc
-iCoAPMessage *cO = [[iCoAPMessage alloc] initAsRequestConfirmable:YES 
+ICoAPMessage *cO = [[ICoAPMessage alloc] initAsRequestConfirmable:YES 
                                          requestMethod:GET 
                                          sendToken:YES 
                                          payload:@""];
@@ -32,21 +32,21 @@ iCoAPMessage *cO = [[iCoAPMessage alloc] initAsRequestConfirmable:YES
 ```
 Options are saved in an NSMutable Dictionary, where each dictionary "key" represents an option number and the matching dictionary "values" consist of NSMutableArrays of the corresponding option values.
 
-* Initialize the `iCoAPTransmission` object and send your message to the desired destination. You can use the following method which performs a sending on initialization:
+* Initialize the `ICoAPExchange` object and send your message to the desired destination. You can use the following method which performs a sending on initialization:
 
 ```objc 
-iCoAPTransmission *transmission = 
-          [[iCoAPTransmission alloc] initAndSendRequestWithCoAPMessage:cO 
+ICoAPExchange *exchange = 
+          [[ICoAPExchange alloc] initAndSendRequestWithCoAPMessage:cO 
                                      toHost:@"4.coap.me" 
                                      port:5683 
                                      delegate:self];
 ```
   Alternatively you can use the standard `init` method, alter properties (optional, but don't forget to set the delegate) and send manually like:
 ```objc 
-[transmission sendRequestWithCoAPMessage:cO toHost:@"4.coap.me" port:5683];
+[exchange sendRequestWithCoAPMessage:cO toHost:@"4.coap.me" port:5683];
 ```
 
-* Implement the delegate methods from the provided `iCoAPTransmissionDelegate` protocol.
+* Implement the delegate methods from the provided `ICoAPExchangeDelegate` protocol.
 
 Now you should be able to communicate.
 
@@ -54,7 +54,7 @@ Details and Examples:
 ====
 
 For detailed information checkout the `iCoAP_Example` App, which provides a simple example of how to use the `iCoAP` Library.
-Additionally, make sure to read the comments in both the `iCoAPTransmission.h` and the `iCoAPMessage.h` files. The available Category `NSString+hex.h` might also be of use by encoding values for the CoAP communication.
+Additionally, make sure to read the comments in both the `ICoAPExchange.h` and the `ICoAPMessage.h` files. The available Category `NSString+hex.h` might also be of use by encoding values for the CoAP communication.
 
 
 Used Libraries:
