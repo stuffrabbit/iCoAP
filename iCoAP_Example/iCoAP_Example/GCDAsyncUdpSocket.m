@@ -172,7 +172,7 @@ enum GCDAsyncUdpSocketConfig
 
 @interface GCDAsyncUdpSocket ()
 {
-	id delegate;
+	__weak id delegate;
 	dispatch_queue_t delegateQueue;
 	
 	GCDAsyncUdpSocketReceiveFilterBlock receiveFilterBlock;
