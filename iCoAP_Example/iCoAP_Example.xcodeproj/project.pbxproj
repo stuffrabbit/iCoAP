@@ -18,7 +18,7 @@
 		932ADE1717A2FABD00EB05AB /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 932ADE1617A2FABD00EB05AB /* Default-568h@2x.png */; };
 		932ADE1A17A2FABD00EB05AB /* MainStoryboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 932ADE1817A2FABD00EB05AB /* MainStoryboard.storyboard */; };
 		932ADE2517A3136100EB05AB /* ExampleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 932ADE2417A3136100EB05AB /* ExampleViewController.m */; };
-		932ADE2D17A3142100EB05AB /* iCoAPMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 932ADE2817A3142100EB05AB /* iCoAPMessage.m */; };
+		932ADE2D17A3142100EB05AB /* ICoAPMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 932ADE2817A3142100EB05AB /* ICoAPMessage.m */; };
 		932ADE2E17A3142100EB05AB /* ICoAPExchange.m in Sources */ = {isa = PBXBuildFile; fileRef = 932ADE2A17A3142100EB05AB /* ICoAPExchange.m */; };
 		932ADE2F17A3142100EB05AB /* NSString+hex.m in Sources */ = {isa = PBXBuildFile; fileRef = 932ADE2C17A3142100EB05AB /* NSString+hex.m */; };
 		932ADE3217A3167900EB05AB /* GCDAsyncUdpSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 932ADE3117A3167900EB05AB /* GCDAsyncUdpSocket.m */; };
@@ -41,8 +41,8 @@
 		932ADE1917A2FABD00EB05AB /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard.storyboard; sourceTree = "<group>"; };
 		932ADE2317A3136100EB05AB /* ExampleViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ExampleViewController.h; sourceTree = "<group>"; };
 		932ADE2417A3136100EB05AB /* ExampleViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ExampleViewController.m; sourceTree = "<group>"; };
-		932ADE2717A3142100EB05AB /* iCoAPMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iCoAPMessage.h; sourceTree = "<group>"; };
-		932ADE2817A3142100EB05AB /* iCoAPMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iCoAPMessage.m; sourceTree = "<group>"; };
+		932ADE2717A3142100EB05AB /* ICoAPMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ICoAPMessage.h; sourceTree = "<group>"; };
+		932ADE2817A3142100EB05AB /* ICoAPMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ICoAPMessage.m; sourceTree = "<group>"; };
 		932ADE2917A3142100EB05AB /* ICoAPExchange.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ICoAPExchange.h; sourceTree = "<group>"; };
 		932ADE2A17A3142100EB05AB /* ICoAPExchange.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ICoAPExchange.m; sourceTree = "<group>"; };
 		932ADE2B17A3142100EB05AB /* NSString+hex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+hex.h"; sourceTree = "<group>"; };
@@ -123,8 +123,8 @@
 		932ADE2617A313BB00EB05AB /* iCoAP-Library_Files */ = {
 			isa = PBXGroup;
 			children = (
-				932ADE2717A3142100EB05AB /* iCoAPMessage.h */,
-				932ADE2817A3142100EB05AB /* iCoAPMessage.m */,
+				932ADE2717A3142100EB05AB /* ICoAPMessage.h */,
+				932ADE2817A3142100EB05AB /* ICoAPMessage.m */,
 				932ADE2917A3142100EB05AB /* ICoAPExchange.h */,
 				932ADE2A17A3142100EB05AB /* ICoAPExchange.m */,
 				932ADE2B17A3142100EB05AB /* NSString+hex.h */,
@@ -204,7 +204,7 @@
 				932ADE0D17A2FABD00EB05AB /* main.m in Sources */,
 				932ADE1117A2FABD00EB05AB /* AppDelegate.m in Sources */,
 				932ADE2517A3136100EB05AB /* ExampleViewController.m in Sources */,
-				932ADE2D17A3142100EB05AB /* iCoAPMessage.m in Sources */,
+				932ADE2D17A3142100EB05AB /* ICoAPMessage.m in Sources */,
 				932ADE2E17A3142100EB05AB /* ICoAPExchange.m in Sources */,
 				932ADE2F17A3142100EB05AB /* NSString+hex.m in Sources */,
 				932ADE3217A3167900EB05AB /* GCDAsyncUdpSocket.m in Sources */,
