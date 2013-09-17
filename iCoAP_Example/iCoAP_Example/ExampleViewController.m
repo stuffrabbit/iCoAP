@@ -122,7 +122,7 @@
     // finally initialize the ICoAPExchange Object. You can alternatively use the standard 'init' method
     // and set all properties manually.
     // coap.me is a test coap server you can use for testing. Note that it might be offline from time to time.
-    if (iExchange == nil) {
+    if (!iExchange) {
         iExchange = [[ICoAPExchange alloc] initAndSendRequestWithCoAPMessage:cO toHost:@"4.coap.me" port:5683 delegate:self];
     }
     else {

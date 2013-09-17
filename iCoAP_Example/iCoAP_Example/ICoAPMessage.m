@@ -10,16 +10,14 @@
 
 
 - (id)init {
-    self = [super init];
-    if (self) {
+    if (self = [super init]) {
         self.optionDict = [[NSMutableDictionary alloc] init];
     }
     return self;
 }
 
 - (id)initAsRequestConfirmable:(BOOL)con requestMethod:(uint)req sendToken:(BOOL)token payload:(NSString *)payload {
-    self = [self init];
-    if (self) {
+    if (self = [self init]) {
         if (con) {
             self.type = CONFIRMABLE;
         }
@@ -43,15 +41,15 @@
 - (void)addOption:(uint)option withValue:(NSString *)value {
     NSMutableArray *valueArray;
     
-    if ([self.optionDict valueForKey:[NSString stringWithFormat:@"%i", option]] == nil) {
+    if ([self.optionDict valueForKey:[NSString stringWithFormat:@"%i", option]]) {
+        valueArray = [self.optionDict valueForKey:[NSString stringWithFormat:@"%i", option]];
+    }
+    else {
         valueArray = [[NSMutableArray alloc] init];
         [self.optionDict setValue:valueArray forKey:[NSString stringWithFormat:@"%i", option]];
     }
-    else {
-        valueArray = [self.optionDict valueForKey:[NSString stringWithFormat:@"%i", option]];
-    }
+    
     [valueArray addObject:value];
-
 }
 
 @end

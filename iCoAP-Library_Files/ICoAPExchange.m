@@ -40,7 +40,7 @@
 - (BOOL)setupUdpSocket {
     self.udpSocket = [[GCDAsyncUdpSocket alloc] initWithDelegate:self delegateQueue:dispatch_get_main_queue()];
     
-    NSError *error = nil;
+    NSError *error;
     if (![self.udpSocket bindToPort:self.udpPort error:&error]) {
         return NO;
     }
@@ -69,18 +69,17 @@
     //Check Version and type (first 4 bits)
     cO.type = strtol([[hexString substringWithRange:NSMakeRange(0, 1)] UTF8String], NULL, 16);
     if (CONFIRMABLE < cO.type > RESET) {
-        cO = nil;
         return nil;
     }
     
     //Check Token length and save it.
     uint tokenLength = strtol([[hexString substringWithRange:NSMakeRange(1, 1)] UTF8String], NULL, 16); // in Bytes
-    
+
     cO.token = strtol([[hexString substringWithRange:NSMakeRange(8, tokenLength * 2)] UTF8String], NULL, 16);
     
     //Code
     cO.code = strtol([[hexString substringWithRange:NSMakeRange(2, 2)] UTF8String], NULL, 16);
-    
+     
     //Message ID
     cO.messageID = strtol([[hexString substringWithRange:NSMakeRange(4, 4)] UTF8String], NULL, 16);
     
@@ -101,7 +100,6 @@
             if (optionDelta == kOptionDeltaPayloadIndicator) {
                 //Payload should follow instead of Option_length. Verifying...
                 if (optionLength != kOptionDeltaPayloadIndicator) {
-                    cO = nil;
                     return nil;
                 }
                 isOptionLoopRunning = NO;
@@ -123,7 +121,6 @@
                 extendedDelta = strtol([[hexString substringWithRange:NSMakeRange(optionIndex + 2, optionIndexOffset - 2)] UTF8String], NULL, 16);
             }
             else {
-                cO = nil;
                 return nil;
             }
             
@@ -136,19 +133,17 @@
                 optionIndexOffset += 4;
             }
             else if (optionLength == kOptionDeltaPayloadIndicator) {
-                cO = nil;
                 return nil;
             }
             optionLength += strtol([[hexString substringWithRange:NSMakeRange(optionIndex + optionLengthExtendedOffsetIndex , optionIndexOffset - optionLengthExtendedOffsetIndex)] UTF8String], NULL, 16);
-            
+
             
             if (optionIndex + optionIndexOffset + optionLength * 2 > [hexString length]) {
-                cO = nil;
                 return nil;
             }
             
             uint newOptionNumber = optionDelta + extendedDelta + prevOptionDelta;
-            NSString *optVal;
+            NSString *optVal;            
             
             if (newOptionNumber == BLOCK2 || newOptionNumber == ETAG || newOptionNumber == IF_MATCH) {
                 optVal = [hexString substringWithRange:NSMakeRange(optionIndex + optionIndexOffset, optionLength * 2)];
@@ -173,7 +168,7 @@
     
     //Payload, first check if payloadmarker exists
     if (payloadStartIndex + 2 < [hexString length]) {
-        if ([cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", CONTENT_FORMAT]] != nil) {
+        if ([cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", CONTENT_FORMAT]]) {
             NSMutableArray *values = [cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", CONTENT_FORMAT]];
             if ([[values objectAtIndex:0] intValue] == OCTET_STREAM || [[values objectAtIndex:0] intValue] == EXI) {
                 cO.payload = [hexString substringFromIndex:payloadStartIndex + 2];
@@ -200,7 +195,7 @@
     else {
         tokenAsString = [NSString stringWithFormat:@"%02X", cO.token];
     }
-    
+
     [final appendString: [NSString stringWithFormat:@"%01X%01X%02X%04X%@", cO.type, [tokenAsString length] / 2, cO.code, cO.messageID, tokenAsString]];
     
     NSArray *sortedArray;
@@ -284,12 +279,12 @@
             
             previousDelta += delta;
         }
-        
-    }
+
+    }    
     
     //Payload encoded to UTF-8
     if ([cO.payload length] > 0) {
-        if ([cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", CONTENT_FORMAT]] != nil) {
+        if ([cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", CONTENT_FORMAT]]) {
             NSMutableArray *values = [cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", CONTENT_FORMAT]];
             if ([[values objectAtIndex:0] intValue] == OCTET_STREAM || [[values objectAtIndex:0] intValue] == EXI) {
                 [final appendString:[NSString stringWithFormat:@"%02X%@", 255, cO.payload]];
@@ -298,7 +293,7 @@
         }
         [final appendString:[NSString stringWithFormat:@"%02X%@", 255, [NSString hexStringFromString:cO.payload]]];
     }
-    
+
     return [self getHexDataFromString:final];
 }
 
@@ -310,15 +305,15 @@
     ICoAPMessage *cO = [self decodeCoAPMessageFromData:data];
     
     //Check if received data is a valid CoAP Message
-    if (cO == nil) {
+    if (!cO) {
         return;
     }
-    
+
     //Set Timestamp
     cO.timestamp = [NSDate date];
     
     //Check for spam and if Observe is Cancelled
-    if ((cO.messageID != pendingCoAPMessageInTransmission.messageID && cO.token != pendingCoAPMessageInTransmission.token) || ([cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", OBSERVE]] != nil && isObserveCancelled && cO.type != ACKNOWLEDGMENT)) {
+    if ((cO.messageID != pendingCoAPMessageInTransmission.messageID && cO.token != pendingCoAPMessageInTransmission.token) || ([cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", OBSERVE]] && isObserveCancelled && cO.type != ACKNOWLEDGMENT)) {
         if (cO.type <= NON_CONFIRMABLE) {
             [self sendCircumstantialResponseWithMessageID:cO.messageID token:cO.token type:RESET toAddress:address];
         }
@@ -330,18 +325,18 @@
         [sendTimer invalidate];
         [maxWaitTimer invalidate];
     }
-    
+
     if (!(cO.type == ACKNOWLEDGMENT && cO.code == EMPTY)) {
         _isMessageInTransmission = NO;
     }
     
     //Separate Response / Observe: Send ACK
-    if (cO.type == CONFIRMABLE) {
+    if (cO.type == CONFIRMABLE) {        
         [self sendCircumstantialResponseWithMessageID:cO.messageID token:cO.token type:ACKNOWLEDGMENT toAddress:address];
     }
     
     //Block Options: Only send a Block2 request when observe option is inactive:
-    if ([cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", BLOCK2]] != nil && [cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", OBSERVE]] == nil) {
+    if ([cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", BLOCK2]] && ![cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", OBSERVE]]) {
         NSString *blockValue = [[cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", BLOCK2]] objectAtIndex:0];
         uint blockNum = strtol([[blockValue substringToIndex:[blockValue length] - 1] UTF8String], NULL, 16);
         uint blockTail = strtol([[blockValue substringFromIndex:[blockValue length] - 1] UTF8String], NULL, 16);
@@ -386,7 +381,7 @@
     }
     
     //Check for Observe Option: If Observe Option is present, the message is only sent to the delegate if the order is correct.
-    if ([cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", OBSERVE]] != nil && cO.type != ACKNOWLEDGMENT) {
+    if ([cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", OBSERVE]] && cO.type != ACKNOWLEDGMENT) {
         uint currentObserveValue = strtol([[[cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", OBSERVE]] objectAtIndex:0] UTF8String], NULL, 16);
         if (currentObserveValue > observeOptionValue) {
             observeOptionValue = currentObserveValue;
@@ -415,7 +410,7 @@
 
 - (void)noResponseExpected {
     NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"No Response expected for recently sent CoAP Message" forKey:NSLocalizedDescriptionKey];
-    
+
     [self sendFailWithErrorToDelegateWithError:[[NSError alloc] initWithDomain:kiCoAPErrorDomain code:NO_RESPONSE_EXPECTED userInfo:userInfo]];
     [self closeTransmission];
 }
@@ -453,7 +448,7 @@
         byteRepresentation = strtol(byte_chars, NULL, 16);
         [commandData appendBytes:&byteRepresentation length:1];
     }
-    
+
     return commandData;
 }
 
@@ -486,13 +481,11 @@
     cO.port = port;
     pendingCoAPMessageInTransmission = cO;
     
-    if (self.udpSocket == nil) {
-        if (![self setupUdpSocket]) {
-            NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"Failed to setup UDP Socket" forKey:NSLocalizedDescriptionKey];
-            
-            [self sendFailWithErrorToDelegateWithError:[[NSError alloc] initWithDomain:kiCoAPErrorDomain code:UDP_SOCKET_ERROR userInfo:userInfo]];
-            return;
-        }
+    if (!self.udpSocket && ![self setupUdpSocket]) {
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"Failed to setup UDP Socket" forKey:NSLocalizedDescriptionKey];
+        
+        [self sendFailWithErrorToDelegateWithError:[[NSError alloc] initWithDomain:kiCoAPErrorDomain code:UDP_SOCKET_ERROR userInfo:userInfo]];
+        return;
     }
     
     [self startSending];
