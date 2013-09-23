@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="4510" systemVersion="12F37" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" initialViewController="Q8z-ec-UiS">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="4510" systemVersion="12F37" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" initialViewController="Q8z-ec-UiS">
     <dependencies>
         <deployment defaultVersion="1552" identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="3742"/>
@@ -9,40 +9,29 @@
         <scene sceneID="5">
             <objects>
                 <viewController id="2" customClass="ExampleViewController" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="8z8-ZH-nhS"/>
-                        <viewControllerLayoutGuide type="bottom" id="5D2-so-nwP"/>
-                    </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="3">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Value" minimumFontSize="17" clearButtonMode="always" translatesAutoresizingMaskIntoConstraints="NO" id="psw-Hp-1yY">
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Value" minimumFontSize="17" clearButtonMode="always" id="psw-Hp-1yY">
                                 <rect key="frame" x="34" y="105" width="251" height="30"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="251" id="CvQ-YL-AEB"/>
-                                </constraints>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocorrectionType="no" returnKeyType="send"/>
                                 <connections>
                                     <outlet property="delegate" destination="2" id="0m9-d2-fCE"/>
                                 </connections>
                             </textField>
-                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" ambiguous="YES" misplaced="YES" text="URI-PATH option value" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YUF-uF-pLS">
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="URI-PATH option value" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="YUF-uF-pLS">
                                 <rect key="frame" x="34" y="77" width="177" height="21"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="177" id="c9Z-br-ors"/>
-                                </constraints>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ikE-oW-Grj">
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="ikE-oW-Grj">
                                 <rect key="frame" x="80" y="144" width="160" height="24"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="24" id="AYh-0v-TDR"/>
-                                    <constraint firstAttribute="width" constant="160" id="Yyf-Rf-3c1"/>
-                                </constraints>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" title="Send">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
@@ -50,30 +39,18 @@
                                     <action selector="onTapSend:" destination="2" eventType="touchUpInside" id="VwA-kY-aFp"/>
                                 </connections>
                             </button>
-                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" editable="NO" text="Start" translatesAutoresizingMaskIntoConstraints="NO" id="6jT-Xt-dvI">
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" editable="NO" text="Start" id="6jT-Xt-dvI">
                                 <rect key="frame" x="0.0" y="186" width="320" height="382"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" heightSizable="YES"/>
                                 <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
-                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" animating="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="cjx-6L-3m7">
+                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" animating="YES" style="gray" id="cjx-6L-3m7">
                                 <rect key="frame" x="209" y="145" width="20" height="20"/>
                             </activityIndicatorView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-                        <constraints>
-                            <constraint firstItem="YUF-uF-pLS" firstAttribute="leading" secondItem="psw-Hp-1yY" secondAttribute="leading" id="3cr-Tm-fMi"/>
-                            <constraint firstItem="ikE-oW-Grj" firstAttribute="centerX" secondItem="psw-Hp-1yY" secondAttribute="centerX" id="4Jo-f8-JY1"/>
-                            <constraint firstItem="ikE-oW-Grj" firstAttribute="top" secondItem="psw-Hp-1yY" secondAttribute="bottom" constant="8" symbolic="YES" id="648-nY-9OI"/>
-                            <constraint firstAttribute="trailing" secondItem="cjx-6L-3m7" secondAttribute="trailing" constant="91" id="C8N-Ey-9YN"/>
-                            <constraint firstItem="6jT-Xt-dvI" firstAttribute="bottom" secondItem="3" secondAttribute="bottom" id="GIx-xD-2Ga"/>
-                            <constraint firstItem="6jT-Xt-dvI" firstAttribute="trailing" secondItem="3" secondAttribute="trailing" id="QYB-mg-1dk"/>
-                            <constraint firstItem="6jT-Xt-dvI" firstAttribute="leading" secondItem="3" secondAttribute="leading" id="Vdy-PR-hu7"/>
-                            <constraint firstItem="YUF-uF-pLS" firstAttribute="top" secondItem="3" secondAttribute="top" constant="77" id="c59-jt-j2k"/>
-                            <constraint firstItem="cjx-6L-3m7" firstAttribute="centerY" secondItem="ikE-oW-Grj" secondAttribute="centerY" id="isI-BU-6qc"/>
-                            <constraint firstItem="6jT-Xt-dvI" firstAttribute="top" secondItem="3" secondAttribute="top" constant="186" id="yph-M3-MSq"/>
-                            <constraint firstItem="psw-Hp-1yY" firstAttribute="top" secondItem="3" secondAttribute="top" constant="105" id="zKc-uF-bve"/>
-                        </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="iCoAP Example" id="gKp-5y-DNI"/>
                     <connections>
@@ -89,6 +66,7 @@
         <!--Navigation Controller-->
         <scene sceneID="nqv-Se-pwr">
             <objects>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="7UW-vk-Vc5" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="Q8z-ec-UiS" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="kWZ-j7-FXH">
@@ -100,7 +78,6 @@
                         <segue destination="2" kind="relationship" relationship="rootViewController" id="ooR-SQ-EzT"/>
                     </connections>
                 </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="7UW-vk-Vc5" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="256" y="143"/>
         </scene>
