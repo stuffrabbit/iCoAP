@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>1A2BCAA2-4B50-47F5-BDFB-9EC1AF744AA6</string>
+	<key>IDESourceControlProjectName</key>
+	<string>iCoAP_Example</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>540311BA-F1FD-4E52-AD1A-66B302FEA8ED</key>
+		<string>https://github.com/stuffrabbit/iCoAP.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>iCoAP_Example/iCoAP_Example.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>540311BA-F1FD-4E52-AD1A-66B302FEA8ED</key>
+		<string>../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/stuffrabbit/iCoAP.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>540311BA-F1FD-4E52-AD1A-66B302FEA8ED</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>540311BA-F1FD-4E52-AD1A-66B302FEA8ED</string>
+			<key>IDESourceControlWCCName</key>
+			<string>iCoAP</string>
+		</dict>
+	</array>
+</dict>
+</plist>

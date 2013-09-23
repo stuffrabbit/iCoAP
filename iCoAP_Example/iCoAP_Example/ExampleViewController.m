@@ -110,6 +110,7 @@
 #pragma mark - Action
 
 - (IBAction)onTapSend:(id)sender {
+    [self.textField resignFirstResponder];
     // Create ICoAPMessage first. You can alternatively use the standard 'init' method
     // and set all properties manually
     ICoAPMessage *cO = [[ICoAPMessage alloc] initAsRequestConfirmable:YES requestMethod:GET sendToken:YES payload:@""];
