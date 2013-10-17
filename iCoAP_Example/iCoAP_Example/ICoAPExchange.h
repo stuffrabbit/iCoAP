@@ -21,7 +21,7 @@
  
  
  
- *  This version uses the public domain licensed CocoaAsyncSocket library
+ *  This version uses the public domain licensed CocoaAsyncSocket library 
  *  for UDP-socket networking.
  *  See more on https://github.com/robbiehanson/CocoaAsyncSocket
  */
@@ -44,19 +44,35 @@
 #define kACK_RANDOM_FACTOR                  1.5
 #define kMAX_TRANSMIT_WAIT                  93.0
 
+#define kMaxObserveOptionValue              8388608
+#define kMaxNotificationDelayTime           128.0
+
+#define kProxyCoAPTypeIndicator             @"COAP_TYPE"    //Type of Response is sent in HTTP Header
+
 #define kiCoAPErrorDomain                   @"iCoAPErrorDomain"
 
 
 typedef enum {
     NO_RESPONSE_EXPECTED,       //  MAX_WAIT time expired and no response is expected
-    UDP_SOCKET_ERROR            //  UDP Socket setup/bind failed
-}ICoAPExchangeErrorCode;
+    UDP_SOCKET_ERROR,           //  UDP Socket setup/bind failed
+    PROXYING_ERROR              //  Error during Proxying
+} ICoAPExchangeErrorCode;
 
 
+typedef enum {
+    PLAIN = 0,
+    LINK_FORMAT = 40,
+    XML = 41,
+    OCTET_STREAM = 42,
+    EXI = 47,
+    JSON = 50
+} SupportedContentFormats;
 
 
-
-@interface ICoAPExchange : NSObject<GCDAsyncUdpSocketDelegate> {
+@interface ICoAPExchange : NSObject<GCDAsyncUdpSocketDelegate, NSURLConnectionDataDelegate, NSURLConnectionDelegate> {
+    uint randomMessageId;
+    uint randomToken;
+    
     long udpSocketTag;
     ICoAPMessage *pendingCoAPMessageInTransmission;
     NSTimer *sendTimer;
@@ -64,7 +80,19 @@ typedef enum {
     int retransmissionCounter;
     
     int observeOptionValue;
+    NSDate *recentNotificationDate;
     BOOL isObserveCancelled;
+    
+    /*
+     HTTP Proxying
+    */
+    NSMutableURLRequest *urlRequest;
+    NSURLConnection *urlConnection;
+    NSMutableData *urlData;
+    
+    ICoAPMessage *proxyCoAPMessage;
+    
+    NSArray *supportedOptions;
 }
 
 
@@ -98,7 +126,7 @@ typedef enum {
 
 /*
  *  'isMessageInTransmission':
- *  Indicates if a ICoAPMessage is currently in transmission and
+ *  Indicates if a ICoAPMessage is currently in transmission and 
  *  if a successive message is expected.
  *  E.g. no response was is received yet, or an empty ACK message indicated a separate response,
  *  or a Block2 message with more-bit set indicated successive
@@ -118,7 +146,11 @@ typedef enum {
 
 
 
-
+/*
+ *  'init':
+ *  Initialization
+ */
+- (id)init;
 
 /*
  *  'initAndSendRequestWithCoAPMessage:toHost:port:delegate':
@@ -131,7 +163,7 @@ typedef enum {
  *  Starts the sending of the given ICoAPMessage to the destination 'host' and
  *  'port'.
  */
-- (void)sendRequestWithCoAPMessage:(ICoAPMessage *)cO toHost:(NSString *)host port:(uint)port ;
+- (void)sendRequestWithCoAPMessage:(ICoAPMessage *)cO toHost:(NSString *)host port:(uint)port;
 
 /*
  *  'cancelObserve':
@@ -193,7 +225,7 @@ typedef enum {
 /*
  *  'iCoAPExchange:didRetransmitCoAPMessage:number:finalRetransmission:':
  *  Informs the delegate that the pending ICoAPMessage is about to be retransmitted.
- *  'final' indicates whether this was the last retransmission (MAX_RETRANSMIT reached),
+ *  'final' indicates whether this was the last retransmission (MAX_RETRANSMIT reached), 
  *  whereas 'number' represents the number of performed retransmissions.
  */
 - (void)iCoAPExchange:(ICoAPExchange *)exchange didRetransmitCoAPMessage:(ICoAPMessage *)coapMessage number:(uint)number finalRetransmission:(BOOL)final;

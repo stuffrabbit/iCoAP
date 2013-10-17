@@ -38,7 +38,6 @@
 #pragma mark - iCoAP Exchange Delegate
 
 - (void)iCoAPExchange:(ICoAPExchange *)exchange didReceiveCoAPMessage:(ICoAPMessage *)coapMessage {
-    //If empty ACK Message received: Indicator for Seperate Message and don't hide activity indicator
 
     if (!exchange.isMessageInTransmission) {
         self.activityIndicator.hidden = YES;
@@ -78,7 +77,7 @@
     NSLog(@"---------------------------");
     
     // did you receive the expected message? then it is recommended to use the closeTransmission method
-    // unless more messages are expected, like e.g. block message, or observe messages.
+    // unless more messages are expected, like e.g. block messages, or observe messages.
     
     //          [iExchange closeTransmission];
 
@@ -169,8 +168,12 @@
             return @"Block 2";
         case BLOCK1:
             return @"Block 1";
+        case SIZE2:
+            return @"Size 2";
         case OBSERVE:
             return @"Observe";
+        case SIZE1:
+            return @"Size 1";
         default:
             return [NSString stringWithFormat:@"Unknown: %i", delta];
     }

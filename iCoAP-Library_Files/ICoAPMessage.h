@@ -75,19 +75,11 @@ typedef enum {
     LOCATION_QUERY = 20,
     BLOCK2 = 23,
     BLOCK1 = 27,
+    SIZE2 = 28,
     PROXY_URI = 35,
     PROXY_SCHEME = 39,
     SIZE1 = 60
 } CoAPOption;
-
-typedef enum {
-    PLAIN = 0,
-    LINK_FORMAT = 40,
-    XML = 41,
-    OCTET_STREAM = 42,
-    EXI = 47,
-    JSON = 50
-} SupportedContentFormats;
 
 
 @interface ICoAPMessage : NSObject
@@ -99,9 +91,7 @@ typedef enum {
 
 
 
-
 #pragma mark - Properties
-
 
 
 
@@ -123,6 +113,27 @@ typedef enum {
  *  upon passing it to a ICoAPExchange object
  */
 @property (readwrite, nonatomic) BOOL isTokenRequested;
+
+/*
+ *  'usesHttpProxying':
+ *  Tells whether this message is supposed to be sent as HTTP-message
+ *  to a HTTP-Proxy (YES), or directly to a CoAP-Server as casual 
+ *  CoAP-message (NO).
+ */
+@property (readwrite, nonatomic) BOOL usesHttpProxying;
+
+/*
+ *  'httpProxyHost':
+ *  The HTTP-Proxy Host (optional).
+ */
+@property (copy) NSString *httpProxyHost;
+
+/*
+ *  'httpProxyPort':
+ *  The HTTP-Proxy Port (optional).
+ */
+@property (readwrite, nonatomic) uint httpProxyPort;
+
 
 /*
  *  'type':
@@ -165,13 +176,13 @@ typedef enum {
 
 /*
  *  'host':
- *  The destination host.
+ *  CoAP-Host of the CoAP-Message destination/origin.
  */
 @property (copy) NSString *host;
 
 /*
  *  'port':
- *  The destination port.
+ *  CoAP-Serverport of the CoAP-Message destination/origin.
  */
 @property (readwrite, nonatomic) uint port;
 
@@ -181,6 +192,9 @@ typedef enum {
  *  The timestamp, the ICoAPMessage is sent or received.
  */
 @property (strong, nonatomic) NSDate *timestamp;
+
+
+
 
 
 

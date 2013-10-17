@@ -37,4 +37,6 @@
 + (NSString *)stringFromDataWithHex:(NSData *) data;
 
 
+
++ (NSString *)get0To4ByteHexStringFromInt:(int32_t)value;
 @end

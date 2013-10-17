@@ -17,20 +17,59 @@
 - (void)sendDidReceiveMessageToDelegateWithCoAPMessage:(ICoAPMessage *)coapMessage;
 - (void)sendDidRetransmitMessageToDelegateWithCoAPMessage:(ICoAPMessage *)coapMessage;
 - (void)sendFailWithErrorToDelegateWithError:(NSError *)error;
+- (void)handleBlock2OptionForCoapMessage:(ICoAPMessage *)cO;
 - (NSMutableData *)getHexDataFromString:(NSString *)string;
-- (void)sendCircumstantialResponseWithMessageID:(uint)messageID token:(uint)token type:(CoAPType)type toAddress:(NSData *)address;
+- (void)sendCircumstantialResponseWithMessageID:(uint)messageID type:(CoAPType)type toAddress:(NSData *)address;
 - (void)startSending;
 - (void)performTransmissionCycle;
 - (void)sendCoAPMessage;
-
+- (void)resetState;
+- (void)sendHttpMessageFromCoAPMessage:(ICoAPMessage *)coapMessage;
+- (NSString *)getHttpHeaderFieldForCoAPOptionDelta:(uint)delta;
+- (NSString *)getHttpMethodForCoAPMessageCode:(uint)code;
+- (CoAPType)getCoapTypeForString:(NSString *)typeString;
+- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error;
+- (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response;
+- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data;
+- (void)connectionDidFinishLoading:(NSURLConnection *)connection;
 @end
 
 @implementation ICoAPExchange
 
 #pragma mark - Init
 
-- (id)initAndSendRequestWithCoAPMessage:(ICoAPMessage *)cO toHost:(NSString* )host port:(uint)port delegate:(id)delegate {
+- (id)init {
     if (self = [super init]) {
+        randomMessageId = 1 + arc4random() % 65536;
+        randomToken = 1 + arc4random() % INT_MAX;
+        
+        supportedOptions =  [NSArray arrayWithObjects:
+                            [NSNumber numberWithInt: IF_MATCH],
+                            [NSNumber numberWithInt: URI_HOST],
+                            [NSNumber numberWithInt: ETAG],
+                            [NSNumber numberWithInt: IF_NONE_MATCH],
+                            [NSNumber numberWithInt: OBSERVE],
+                            [NSNumber numberWithInt: URI_PORT],
+                            [NSNumber numberWithInt: LOCATION_PATH],
+                            [NSNumber numberWithInt: URI_PATH],
+                            [NSNumber numberWithInt: CONTENT_FORMAT],
+                            [NSNumber numberWithInt: MAX_AGE],
+                            [NSNumber numberWithInt: URI_QUERY],
+                            [NSNumber numberWithInt: ACCEPT],
+                            [NSNumber numberWithInt: LOCATION_QUERY],
+                            [NSNumber numberWithInt: BLOCK2],
+                            [NSNumber numberWithInt: BLOCK1],
+                            [NSNumber numberWithInt: SIZE2],
+                            [NSNumber numberWithInt: PROXY_URI],
+                            [NSNumber numberWithInt: PROXY_SCHEME],
+                            [NSNumber numberWithInt: SIZE1],
+                            nil];
+    }
+    return self;
+}
+
+- (id)initAndSendRequestWithCoAPMessage:(ICoAPMessage *)cO toHost:(NSString* )host port:(uint)port delegate:(id)delegate {
+    if (self = [self init]) {
         self.delegate = delegate;
         [self sendRequestWithCoAPMessage:cO toHost:host port:port];
     }
@@ -145,10 +184,10 @@
             uint newOptionNumber = optionDelta + extendedDelta + prevOptionDelta;
             NSString *optVal;            
             
-            if (newOptionNumber == BLOCK2 || newOptionNumber == ETAG || newOptionNumber == IF_MATCH) {
+            if (newOptionNumber == ETAG || newOptionNumber == IF_MATCH) {
                 optVal = [hexString substringWithRange:NSMakeRange(optionIndex + optionIndexOffset, optionLength * 2)];
             }
-            else if (newOptionNumber == URI_PORT || newOptionNumber == CONTENT_FORMAT || newOptionNumber == MAX_AGE || newOptionNumber == ACCEPT || newOptionNumber == SIZE1 || newOptionNumber == OBSERVE) {
+            else if (newOptionNumber == BLOCK2 || newOptionNumber == URI_PORT || newOptionNumber == CONTENT_FORMAT || newOptionNumber == MAX_AGE || newOptionNumber == ACCEPT || newOptionNumber == SIZE1 || newOptionNumber == SIZE2 || newOptionNumber == OBSERVE) {
                 optVal = [NSString stringWithFormat:@"%i", (int)strtol([[hexString substringWithRange:NSMakeRange(optionIndex + optionIndexOffset, optionLength * 2)] UTF8String], NULL, 16)];
             }
             else {
@@ -168,14 +207,7 @@
     
     //Payload, first check if payloadmarker exists
     if (payloadStartIndex + 2 < [hexString length]) {
-        if ([cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", CONTENT_FORMAT]]) {
-            NSMutableArray *values = [cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", CONTENT_FORMAT]];
-            if ([[values objectAtIndex:0] intValue] == OCTET_STREAM || [[values objectAtIndex:0] intValue] == EXI) {
-                cO.payload = [hexString substringFromIndex:payloadStartIndex + 2];
-                return cO;
-            }
-        }
-        cO.payload = [[NSString stringFromHexString:[hexString substringFromIndex:payloadStartIndex + 2]] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+        cO.payload = [self requiresPayloadStringDecodeForCoAPMessage:cO] ? [[NSString stringFromHexString:[hexString substringFromIndex:payloadStartIndex + 2]] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding] : [hexString substringFromIndex:payloadStartIndex + 2];
     }
     return cO;
 }
@@ -184,18 +216,8 @@
 
 - (NSData *)encodeDataFromCoAPMessage:(ICoAPMessage *)cO {
     NSMutableString *final = [[NSMutableString alloc] init];
-    NSString *tokenAsString;
+    NSString *tokenAsString = [NSString get0To4ByteHexStringFromInt:cO.token];
     
-    if (cO.token == 0) {
-        tokenAsString = @"";
-    }
-    else if (cO.token > 255) {
-        tokenAsString = [NSString stringWithFormat:@"%04X", cO.token];
-    }
-    else {
-        tokenAsString = [NSString stringWithFormat:@"%02X", cO.token];
-    }
-
     [final appendString: [NSString stringWithFormat:@"%01X%01X%02X%04X%@", cO.type, [tokenAsString length] / 2, cO.code, cO.messageID, tokenAsString]];
     
     NSArray *sortedArray;
@@ -210,36 +232,20 @@
         
         for (uint i = 0; i < [valueArray count]; i++) {
             uint delta = [key intValue] - previousDelta;
-            uint length;
             NSString *valueForKey;
             
-            if ([key intValue] == BLOCK2 || [key intValue] == ETAG || [key intValue] == IF_MATCH) {
+            if ([key intValue] == ETAG || [key intValue] == IF_MATCH) {
                 valueForKey = [valueArray objectAtIndex:i];
-                length = [valueForKey length] / 2;
             }
-            else if ([key intValue] == URI_PORT || [key intValue] == CONTENT_FORMAT || [key intValue] == MAX_AGE || [key intValue] == ACCEPT || [key intValue] == SIZE1) {
-                if ([[valueArray objectAtIndex:i] length] == 0) {
-                    valueForKey = @"";
-                }
-                else if ([[valueArray objectAtIndex:i] intValue] < 255) {
-                    valueForKey = [NSString stringWithFormat:@"%02X", [[valueArray objectAtIndex:i] intValue]];
-                }
-                else if ([[valueArray objectAtIndex:i] intValue] <= 65535) {
-                    valueForKey = [NSString stringWithFormat:@"%04X", [[valueArray objectAtIndex:i] intValue]];
-                }
-                else if ([[valueArray objectAtIndex:i] intValue] <= 16777215) {
-                    valueForKey = [NSString stringWithFormat:@"%06X", [[valueArray objectAtIndex:i] intValue]];
-                }
-                else {
-                    valueForKey = [NSString stringWithFormat:@"%08X", [[valueArray objectAtIndex:i] intValue]];
-                }
-                length = [valueForKey length] / 2;
+            else if ([key intValue] == BLOCK2 || [key intValue] == URI_PORT || [key intValue] == CONTENT_FORMAT || [key intValue] == MAX_AGE || [key intValue] == ACCEPT || [key intValue] == SIZE1 || [key intValue] == SIZE2) {
+                valueForKey = [NSString get0To4ByteHexStringFromInt:[[valueArray objectAtIndex:i] intValue]];
             }
             else {
-                valueForKey = [valueArray objectAtIndex:i];
-                length = [valueForKey length];
+                valueForKey = [NSString hexStringFromString:[valueArray objectAtIndex:i]];
             }
             
+            uint length = [valueForKey length] / 2;
+
             NSString *extendedDelta = @"";
             NSString *extendedLength = @"";
             
@@ -269,14 +275,8 @@
             
             [final appendString:extendedDelta];
             [final appendString:extendedLength];
-            
-            if ([key intValue] == BLOCK2 || [key intValue] == ETAG || [key intValue] == IF_MATCH || [key intValue] == URI_PORT || [key intValue] == CONTENT_FORMAT || [key intValue] == MAX_AGE || [key intValue] == ACCEPT || [key intValue] == SIZE1) {
-                [final appendString:valueForKey];
-            }
-            else {
-                [final appendString:[NSString hexStringFromString:valueForKey]];
-            }
-            
+            [final appendString:valueForKey];
+
             previousDelta += delta;
         }
 
@@ -297,7 +297,6 @@
     return [self getHexDataFromString:final];
 }
 
-
 #pragma mark - GCD Async UDP Socket Delegate
 
 - (void)udpSocket:(GCDAsyncUdpSocket *)sock didReceiveData:(NSData *)data fromAddress:(NSData *)address withFilterContext:(id)filterContext {
@@ -310,12 +309,12 @@
     }
 
     //Set Timestamp
-    cO.timestamp = [NSDate date];
+    cO.timestamp = [[NSDate alloc] init];
     
     //Check for spam and if Observe is Cancelled
     if ((cO.messageID != pendingCoAPMessageInTransmission.messageID && cO.token != pendingCoAPMessageInTransmission.token) || ([cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", OBSERVE]] && isObserveCancelled && cO.type != ACKNOWLEDGMENT)) {
         if (cO.type <= NON_CONFIRMABLE) {
-            [self sendCircumstantialResponseWithMessageID:cO.messageID token:cO.token type:RESET toAddress:address];
+            [self sendCircumstantialResponseWithMessageID:cO.messageID type:RESET toAddress:address];
         }
         return;
     }
@@ -326,72 +325,43 @@
         [maxWaitTimer invalidate];
     }
 
-    if (!(cO.type == ACKNOWLEDGMENT && cO.code == EMPTY)) {
+    if (!(cO.type == ACKNOWLEDGMENT && cO.code == EMPTY) && !([cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", BLOCK2]] && ![cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", OBSERVE]])) {
         _isMessageInTransmission = NO;
     }
     
     //Separate Response / Observe: Send ACK
     if (cO.type == CONFIRMABLE) {        
-        [self sendCircumstantialResponseWithMessageID:cO.messageID token:cO.token type:ACKNOWLEDGMENT toAddress:address];
+        [self sendCircumstantialResponseWithMessageID:cO.messageID type:ACKNOWLEDGMENT toAddress:address];
     }
     
     //Block Options: Only send a Block2 request when observe option is inactive:
     if ([cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", BLOCK2]] && ![cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", OBSERVE]]) {
-        NSString *blockValue = [[cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", BLOCK2]] objectAtIndex:0];
-        uint blockNum = strtol([[blockValue substringToIndex:[blockValue length] - 1] UTF8String], NULL, 16);
-        uint blockTail = strtol([[blockValue substringFromIndex:[blockValue length] - 1] UTF8String], NULL, 16);
-        
-        if (blockTail > 7) {
-            //More Flag is set
-            ICoAPMessage *blockObject = [[ICoAPMessage alloc] init];
-            blockObject.isRequest = YES;
-            blockObject.type = CONFIRMABLE;
-            blockObject.code = pendingCoAPMessageInTransmission.code;
-            blockObject.messageID = pendingCoAPMessageInTransmission.messageID + 1;
-            blockObject.token = pendingCoAPMessageInTransmission.token;
-            blockObject.host = pendingCoAPMessageInTransmission.host;
-            blockObject.port = pendingCoAPMessageInTransmission.port;
-            blockObject.optionDict =  [[NSMutableDictionary alloc] init];
-            for (id key in pendingCoAPMessageInTransmission.optionDict) {
-                if (![key isEqualToString:[NSString stringWithFormat:@"%i", BLOCK2]]) {
-                    [blockObject.optionDict setValue:[[NSMutableArray alloc] initWithArray:[pendingCoAPMessageInTransmission.optionDict valueForKey:key]] forKey:key];
-                }
-            }
-            
-            NSString *newBlockValue;
-            
-            if (blockNum >= 4095 ) {
-                newBlockValue = [NSString stringWithFormat:@"%05X%01X", blockNum + 1, blockTail - 8];
-            }
-            else if (blockNum >= 15) {
-                newBlockValue = [NSString stringWithFormat:@"%03X%01X", blockNum + 1, blockTail - 8];
-            }
-            else {
-                newBlockValue = [NSString stringWithFormat:@"%01X%01X", blockNum + 1, blockTail - 8];
-            }
-            
-            [blockObject addOption:BLOCK2 withValue:newBlockValue];
-            
-            pendingCoAPMessageInTransmission = blockObject;
-            [self startSending];
-        }
-        else {
-            _isMessageInTransmission = NO;
-        }
+        [self handleBlock2OptionForCoapMessage:cO];
     }
     
     //Check for Observe Option: If Observe Option is present, the message is only sent to the delegate if the order is correct.
     if ([cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", OBSERVE]] && cO.type != ACKNOWLEDGMENT) {
-        uint currentObserveValue = strtol([[[cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", OBSERVE]] objectAtIndex:0] UTF8String], NULL, 16);
-        if (currentObserveValue > observeOptionValue) {
+        uint currentObserveValue = [[[cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", OBSERVE]] objectAtIndex:0] intValue];
+       
+        if (!recentNotificationDate) {
+            recentNotificationDate = [[NSDate alloc] init];
+        }
+        
+        recentNotificationDate = [recentNotificationDate dateByAddingTimeInterval:kMaxNotificationDelayTime];
+        
+        if ((observeOptionValue < currentObserveValue && currentObserveValue - observeOptionValue < kMaxObserveOptionValue) ||
+            (observeOptionValue > currentObserveValue && observeOptionValue - currentObserveValue > kMaxObserveOptionValue) ||
+            [recentNotificationDate compare:cO.timestamp] == NSOrderedAscending) {
+            
+            recentNotificationDate = cO.timestamp;
             observeOptionValue = currentObserveValue;
-            [self sendDidReceiveMessageToDelegateWithCoAPMessage:cO];
+        }
+        else {
+            return;
         }
     }
-    else {
-        //No Observe Option: Sending object to delegate
-        [self sendDidReceiveMessageToDelegateWithCoAPMessage:cO];
-    }
+    
+    [self sendDidReceiveMessageToDelegateWithCoAPMessage:cO];
 }
 
 - (void)udpSocket:(GCDAsyncUdpSocket *)sock didNotSendDataWithTag:(long)tag dueToError:(NSError *)error {
@@ -437,6 +407,48 @@
 
 #pragma mark - Other Methods
 
+- (void)handleBlock2OptionForCoapMessage:(ICoAPMessage *)cO {
+    NSString *blockValue = [NSString stringWithFormat:@"%02X", [[[cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", BLOCK2]] objectAtIndex:0] intValue]];
+    
+    uint blockNum = strtol([[blockValue substringToIndex:[blockValue length] - 1] UTF8String], NULL, 16);
+    uint blockTail = strtol([[blockValue substringFromIndex:[blockValue length] - 1] UTF8String], NULL, 16);
+    
+    if (blockTail > 7) {
+        //More Flag is set
+        ICoAPMessage *blockObject = [[ICoAPMessage alloc] init];
+        blockObject.isRequest = YES;
+        blockObject.type = CONFIRMABLE;
+        blockObject.code = pendingCoAPMessageInTransmission.code;
+        blockObject.messageID = pendingCoAPMessageInTransmission.messageID + 1 % 65536;
+        randomMessageId++;
+        blockObject.token = pendingCoAPMessageInTransmission.token;
+        blockObject.host = pendingCoAPMessageInTransmission.host;
+        blockObject.port = pendingCoAPMessageInTransmission.port;
+        blockObject.httpProxyHost = pendingCoAPMessageInTransmission.httpProxyHost;
+        blockObject.httpProxyPort = pendingCoAPMessageInTransmission.httpProxyPort;
+        blockObject.optionDict =  [[NSMutableDictionary alloc] init];
+        for (id key in pendingCoAPMessageInTransmission.optionDict) {
+            if (![key isEqualToString:[NSString stringWithFormat:@"%i", BLOCK2]]) {
+                [blockObject.optionDict setValue:[[NSMutableArray alloc] initWithArray:[pendingCoAPMessageInTransmission.optionDict valueForKey:key]] forKey:key];
+            }
+        }
+        
+        NSString *newBlockValue = [NSString stringWithFormat:@"%i", (blockNum + 1) * 16 + blockTail - 8];
+        [blockObject addOption:BLOCK2 withValue:newBlockValue];
+        
+        pendingCoAPMessageInTransmission = blockObject;
+        if (cO.usesHttpProxying) {
+            [self sendHttpMessageFromCoAPMessage:pendingCoAPMessageInTransmission];
+        }
+        else {
+            [self startSending];
+        }
+    }
+    else {
+        _isMessageInTransmission = NO;
+    }
+}
+
 - (NSMutableData *)getHexDataFromString:(NSString *)string {
     NSMutableData *commandData= [[NSMutableData alloc] init];
     unsigned char byteRepresentation;
@@ -458,7 +470,7 @@
 
 #pragma mark - Send Methods
 
-- (void)sendCircumstantialResponseWithMessageID:(uint)messageID token:(uint)token type:(CoAPType)type toAddress:(NSData *)address {
+- (void)sendCircumstantialResponseWithMessageID:(uint)messageID type:(CoAPType)type toAddress:(NSData *)address {
     ICoAPMessage *ackObject = [[ICoAPMessage alloc] init];
     ackObject.isRequest = NO;
     ackObject.type = type;
@@ -470,35 +482,38 @@
 }
 
 - (void)sendRequestWithCoAPMessage:(ICoAPMessage *)cO toHost:(NSString *)host port:(uint)port {
-    cO.messageID = arc4random() % 65536;
+    randomMessageId++;
+    randomToken++;
+    
+    cO.messageID = randomMessageId % 65536;
     
     if ([cO isTokenRequested]) {
-        cO.token = 1 + arc4random() % 65536;
+        cO.token = randomToken % INT_MAX;
     }
     
     cO.isRequest = YES;
     cO.host = host;
     cO.port = port;
     pendingCoAPMessageInTransmission = cO;
-    
-    if (!self.udpSocket && ![self setupUdpSocket]) {
-        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"Failed to setup UDP Socket" forKey:NSLocalizedDescriptionKey];
-        
-        [self sendFailWithErrorToDelegateWithError:[[NSError alloc] initWithDomain:kiCoAPErrorDomain code:UDP_SOCKET_ERROR userInfo:userInfo]];
-        return;
+    pendingCoAPMessageInTransmission.timestamp = [[NSDate alloc] init];
+
+    if (cO.usesHttpProxying) {
+        [self sendHttpMessageFromCoAPMessage:pendingCoAPMessageInTransmission];
     }
-    
-    [self startSending];
+    else {
+        if (!self.udpSocket && ![self setupUdpSocket]) {
+            NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"Failed to setup UDP Socket" forKey:NSLocalizedDescriptionKey];
+            
+            [self sendFailWithErrorToDelegateWithError:[[NSError alloc] initWithDomain:kiCoAPErrorDomain code:UDP_SOCKET_ERROR userInfo:userInfo]];
+            return;
+        }
+        
+        [self startSending];
+    }
 }
 
 - (void)startSending {
-    [sendTimer invalidate];
-    [maxWaitTimer invalidate];
-    isObserveCancelled = NO;
-    observeOptionValue = 0;
-    _isMessageInTransmission = YES;
-    
-    pendingCoAPMessageInTransmission.timestamp = [NSDate date];
+    [self resetState];
     
     if (pendingCoAPMessageInTransmission.type == CONFIRMABLE) {
         retransmissionCounter = 0;
@@ -531,12 +546,194 @@
 }
 
 - (void)closeTransmission {
-    [self.udpSocket close];
-    self.udpSocket = nil;
-    [sendTimer invalidate];
-    [maxWaitTimer invalidate];
+    if (pendingCoAPMessageInTransmission.usesHttpProxying) {
+        [urlConnection cancel];
+        urlConnection = nil;
+        urlData = nil;
+        urlRequest = nil;
+    }
+    else {
+        self.udpSocket.delegate = nil;
+        [self.udpSocket close];
+        self.udpSocket = nil;
+        [sendTimer invalidate];
+        [maxWaitTimer invalidate];
+    }
+    
+    recentNotificationDate = nil;
     pendingCoAPMessageInTransmission = nil;
     _isMessageInTransmission = NO;
+}
+
+- (void)resetState {
+    [sendTimer invalidate];
+    [maxWaitTimer invalidate];
+    isObserveCancelled = NO;
+    observeOptionValue = 0;
+    recentNotificationDate = nil;
+    _isMessageInTransmission = YES;
+}
+
+#pragma mark - HTTP Proxying
+
+- (void)sendHttpMessageFromCoAPMessage:(ICoAPMessage *)coapMessage {
+    [self resetState];
+
+    NSString *urlString = [NSString stringWithFormat:@"http://%@:%i/%@:%i",coapMessage.httpProxyHost, coapMessage.httpProxyPort, coapMessage.host, coapMessage.port];
+    urlRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:urlString] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:kMAX_TRANSMIT_WAIT];
+    
+    if (coapMessage.code != GET) {
+        [urlRequest setHTTPMethod:[self getHttpMethodForCoAPMessageCode:coapMessage.code]];
+    }
+    
+    for (id key in coapMessage.optionDict) {
+        NSMutableArray *values = [coapMessage.optionDict valueForKey:key];
+        for (NSString *value in values) {
+            [urlRequest addValue:value forHTTPHeaderField:[self getHttpHeaderFieldForCoAPOptionDelta:[key intValue]]];
+        }
+    }
+    
+    [urlRequest setHTTPBody:[coapMessage.payload dataUsingEncoding:NSUTF8StringEncoding]];
+    urlConnection = [[NSURLConnection alloc] initWithRequest:urlRequest delegate:self];
+    if (!urlConnection) {
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"Failed to send HTTP-Request." forKey:NSLocalizedDescriptionKey];
+        [self sendFailWithErrorToDelegateWithError:[[NSError alloc] initWithDomain:kiCoAPErrorDomain code:PROXYING_ERROR userInfo:userInfo]];
+    }
+}
+
+#pragma mark - Mapping Methods for Proxying
+
+- (NSString *)getHttpHeaderFieldForCoAPOptionDelta:(uint)delta {
+    switch (delta) {
+        case IF_MATCH:
+            return @"IF_MATCH";
+        case URI_HOST:
+            return @"URI_HOST";
+        case ETAG:
+            return @"ETAG";
+        case IF_NONE_MATCH:
+            return @"IF_NONE_MATCH";
+        case URI_PORT:
+            return @"URI_PORT";
+        case LOCATION_PATH:
+            return @"LOCATION_PATH";
+        case URI_PATH:
+            return @"URI_PATH";
+        case CONTENT_FORMAT:
+            return @"CONTENT_FORMAT";
+        case MAX_AGE:
+            return @"MAX_AGE";
+        case URI_QUERY:
+            return @"URI_QUERY";
+        case ACCEPT:
+            return @"ACCEPT";
+        case LOCATION_QUERY:
+            return @"LOCATION_QUERY";
+        case PROXY_URI:
+            return  @"PROXY_URI";
+        case PROXY_SCHEME:
+            return @"PROXY_SCHEME";
+        case BLOCK2:
+            return @"BLOCK2";
+        case BLOCK1:
+            return @"BLOCK1";
+        case OBSERVE:
+            return @"OBSERVE";
+        case SIZE1:
+            return @"SIZE1";
+        case SIZE2:
+            return @"SIZE2";
+        default:
+            return nil;
+    }
+}
+
+- (NSString *)getHttpMethodForCoAPMessageCode:(uint)code {
+    switch (code) {
+        case POST:
+            return @"POST";
+        case PUT:
+            return @"PUT";
+        case DELETE:
+            return @"DELETE";
+        default:
+            return @"GET";
+    }
+}
+
+- (CoAPType)getCoapTypeForString:(NSString *)typeString {
+    if ([typeString isEqualToString:@"CON"]) {
+        return CONFIRMABLE;
+    }
+    else if ([typeString isEqualToString:@"NON"]) {
+        return NON_CONFIRMABLE;
+    }
+    else if ([typeString isEqualToString:@"RES"]) {
+        return RESET;
+    }
+    else {
+        return ACKNOWLEDGMENT;
+    }
+}
+#pragma mark - NSURL Connection Delegate
+
+- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
+    [self closeTransmission];
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"Proxying Failure." forKey:NSLocalizedDescriptionKey];
+    [self sendFailWithErrorToDelegateWithError:[[NSError alloc] initWithDomain:kiCoAPErrorDomain code:PROXYING_ERROR userInfo:userInfo]];
+}
+
+#pragma mark - NSURL Connection Data Delegate
+
+- (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {
+    urlData = [[NSMutableData alloc] init];
+    proxyCoAPMessage = [[ICoAPMessage alloc] init];
+    proxyCoAPMessage.isRequest = NO;
+    
+    NSHTTPURLResponse *httpresponse = (NSHTTPURLResponse *)response;
+    
+    for (NSNumber *optNumber in supportedOptions) {
+        NSString *optString = [self getHttpHeaderFieldForCoAPOptionDelta:[optNumber intValue]];
+        
+        if ([httpresponse.allHeaderFields objectForKey:[NSString stringWithFormat:@"HTTP_%@", optString]]) {
+            NSString *valueString = [httpresponse.allHeaderFields objectForKey:[NSString stringWithFormat:@"HTTP_%@", optString]];
+            NSArray *valueArray = [valueString componentsSeparatedByString:@","];
+            
+            [proxyCoAPMessage.optionDict setValue:[NSMutableArray arrayWithArray:valueArray] forKey:[optNumber stringValue]];
+        }
+    }
+    
+    proxyCoAPMessage.type = [self getCoapTypeForString:[httpresponse.allHeaderFields objectForKey:kProxyCoAPTypeIndicator]];
+    proxyCoAPMessage.code = httpresponse.statusCode;
+    proxyCoAPMessage.usesHttpProxying = YES;
+}
+
+- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
+    [urlData appendData:data];
+}
+
+- (void)connectionDidFinishLoading:(NSURLConnection *)connection {
+    proxyCoAPMessage.payload = [self requiresPayloadStringDecodeForCoAPMessage:proxyCoAPMessage] ? [NSString stringFromHexString:[NSString stringFromDataWithHex:urlData]] : [NSString stringFromDataWithHex:urlData];
+    proxyCoAPMessage.timestamp = [[NSDate alloc] init];
+    
+    if ([proxyCoAPMessage.optionDict valueForKey:[NSString stringWithFormat:@"%i", BLOCK2]] && ![proxyCoAPMessage.optionDict valueForKey:[NSString stringWithFormat:@"%i", OBSERVE]]) {
+        [self handleBlock2OptionForCoapMessage:proxyCoAPMessage];
+    }
+    else {
+        _isMessageInTransmission = NO;
+    }
+    
+    [self sendDidReceiveMessageToDelegateWithCoAPMessage:proxyCoAPMessage];
+}
+
+- (BOOL)requiresPayloadStringDecodeForCoAPMessage:(ICoAPMessage *)coapMessage {
+    if ([coapMessage.optionDict valueForKey:[NSString stringWithFormat:@"%i", CONTENT_FORMAT]]) {
+        NSMutableArray *values = [coapMessage.optionDict valueForKey:[NSString stringWithFormat:@"%i", CONTENT_FORMAT]];
+        if ([[values objectAtIndex:0] intValue] == OCTET_STREAM || [[values objectAtIndex:0] intValue] == EXI) {
+            return NO;
+        }
+    }
+    return YES;
 }
 
 @end
