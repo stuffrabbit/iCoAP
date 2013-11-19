@@ -79,13 +79,13 @@
     // did you receive the expected message? then it is recommended to use the closeTransmission method
     // unless more messages are expected, like e.g. block messages, or observe messages.
     
-    //          [iExchange closeTransmission];
+    //          [iExchange closeExchange];
 
 
 }
 - (void)iCoAPExchange:(ICoAPExchange *)exchange didFailWithError:(NSError *)error {
     //Handle Errors
-    if (error.code == UDP_SOCKET_ERROR || error.code == NO_RESPONSE_EXPECTED) {
+    if (error.code == IC_UDP_SOCKET_ERROR || error.code == IC_RESPONSE_TIMEOUT) {
         [self.textView setText:[NSString stringWithFormat:@"Failed: %@\n\n%@", [error localizedDescription], self.textView.text]];
         self.activityIndicator.hidden = YES;
     }
@@ -112,11 +112,11 @@
     [self.textField resignFirstResponder];
     // Create ICoAPMessage first. You can alternatively use the standard 'init' method
     // and set all properties manually
-    ICoAPMessage *cO = [[ICoAPMessage alloc] initAsRequestConfirmable:YES requestMethod:GET sendToken:YES payload:@""];
-    [cO addOption:URI_PATH withValue:self.textField.text];
+    ICoAPMessage *cO = [[ICoAPMessage alloc] initAsRequestConfirmable:YES requestMethod:IC_GET sendToken:YES payload:@""];
+    [cO addOption:IC_URI_PATH withValue:self.textField.text];
 
     // add more Options here if required e.g. observe
-    // [cO addOption:OBSERVE withValue:@""];
+    // [cO addOption:IC_OBSERVE withValue:@""];
     
     
     // finally initialize the ICoAPExchange Object. You can alternatively use the standard 'init' method
@@ -136,43 +136,43 @@
 
 - (NSString *)getOptionDisplayStringForCoAPOptionDelta:(uint)delta {
     switch (delta) {
-        case IF_MATCH:
+        case IC_IF_MATCH:
             return @"If Match";
-        case URI_HOST:
+        case IC_URI_HOST:
             return @"URI Host";
-        case ETAG:
+        case IC_ETAG:
             return @"ETAG";
-        case IF_NONE_MATCH:
+        case IC_IF_NONE_MATCH:
             return @"If None Match";
-        case URI_PORT:
+        case IC_URI_PORT:
             return @"URI Port";
-        case LOCATION_PATH:
+        case IC_LOCATION_PATH:
             return @"Location Path";
-        case URI_PATH:
+        case IC_URI_PATH:
             return @"URI Path";
-        case CONTENT_FORMAT:
+        case IC_CONTENT_FORMAT:
             return @"Content Format";
-        case MAX_AGE:
+        case IC_MAX_AGE:
             return @"Max Age";
-        case URI_QUERY:
+        case IC_URI_QUERY:
             return @"URI Query";
-        case ACCEPT:
+        case IC_ACCEPT:
             return @"Accept";
-        case LOCATION_QUERY:
+        case IC_LOCATION_QUERY:
             return @"Location Query";
-        case PROXY_URI:
+        case IC_PROXY_URI:
             return  @"Proxy URI";
-        case PROXY_SCHEME:
+        case IC_PROXY_SCHEME:
             return @"Proxy Scheme";
-        case BLOCK2:
+        case IC_BLOCK2:
             return @"Block 2";
-        case BLOCK1:
+        case IC_BLOCK1:
             return @"Block 1";
-        case SIZE2:
+        case IC_SIZE2:
             return @"Size 2";
-        case OBSERVE:
+        case IC_OBSERVE:
             return @"Observe";
-        case SIZE1:
+        case IC_SIZE1:
             return @"Size 1";
         default:
             return [NSString stringWithFormat:@"Unknown: %i", delta];
@@ -181,13 +181,13 @@
 
 - (NSString *)getTypeDisplayStringForCoAPObject:(ICoAPMessage *)cO {
     switch (cO.type) {
-        case CONFIRMABLE:
+        case IC_CONFIRMABLE:
             return @"Confirmable (CON)";
-        case NON_CONFIRMABLE:
+        case IC_NON_CONFIRMABLE:
             return @"Non Confirmable (NON)";
-        case ACKNOWLEDGMENT:
+        case IC_ACKNOWLEDGMENT:
             return @"Acknowledgment (ACK)";
-        case RESET:
+        case IC_RESET:
             return @"Reset (RES)";
         default:
             return [NSString stringWithFormat:@"Unknown: %i", cO.type];
@@ -196,49 +196,49 @@
 
 - (NSString *)getCodeDisplayStringForCoAPObject:(ICoAPMessage *)cO {
     switch (cO.code) {
-        case EMPTY:
+        case IC_EMPTY:
             return @"Empty";
-        case CREATED:
+        case IC_CREATED:
             return @"Created";
-        case DELETED:
+        case IC_DELETED:
             return @"Deleted";
-        case VALID:
+        case IC_VALID:
             return @"Valid";
-        case CHANGED:
+        case IC_CHANGED:
             return @"Changed";
-        case CONTENT:
+        case IC_CONTENT:
             return @"Content";
-        case BAD_REQUEST:
+        case IC_BAD_REQUEST:
             return @"Bad Request";
-        case UNAUTHORIZED:
+        case IC_UNAUTHORIZED:
             return @"Unauthorized";
-        case BAD_OPTION:
+        case IC_BAD_OPTION:
             return @"Bad Option";
-        case FORBIDDEN:
+        case IC_FORBIDDEN:
             return @"Forbidden";
-        case NOT_FOUND:
+        case IC_NOT_FOUND:
             return @"Not Found";
-        case METHOD_NOT_ALLOWED:
+        case IC_METHOD_NOT_ALLOWED:
             return @"Method Not Allowed";
-        case NOT_ACCEPTABLE:
+        case IC_NOT_ACCEPTABLE:
             return @"Not Acceptable";
-        case PRECONDITION_FAILED:
+        case IC_PRECONDITION_FAILED:
             return @"Precondition Failed";
-        case REQUEST_ENTITY_TOO_LARGE:
+        case IC_REQUEST_ENTITY_TOO_LARGE:
             return @"Request Entity Too Large";
-        case UNSUPPORTED_CONTENT_FORMAT:
+        case IC_UNSUPPORTED_CONTENT_FORMAT:
             return @"Unsupported Content Format";
-        case INTERNAL_SERVER_ERROR:
+        case IC_INTERNAL_SERVER_ERROR:
             return @"Internal Server Error";
-        case NOT_IMPLEMENTED:
+        case IC_NOT_IMPLEMENTED:
             return @"Not Implemented";
-        case BAD_GATEWAY:
+        case IC_BAD_GATEWAY:
             return @"Bad Gateway";
-        case SERVICE_UNAVAILABLE:
+        case IC_SERVICE_UNAVAILABLE:
             return @"Service Unavailable";
-        case GATEWAY_TIMEOUT:
+        case IC_GATEWAY_TIMEOUT:
             return @"Gateway Timeout";
-        case PROXYING_NOT_SUPPORTED:
+        case IC_PROXYING_NOT_SUPPORTED:
             return @"Proxying Not Supported";
         default:
             return [NSString stringWithFormat:@"Unknown: %i", cO.code];

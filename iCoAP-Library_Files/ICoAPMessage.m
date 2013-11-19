@@ -19,16 +19,16 @@
 - (id)initAsRequestConfirmable:(BOOL)con requestMethod:(uint)req sendToken:(BOOL)token payload:(NSString *)payload {
     if (self = [self init]) {
         if (con) {
-            self.type = CONFIRMABLE;
+            self.type = IC_CONFIRMABLE;
         }
         else {
-            self.type = NON_CONFIRMABLE;
+            self.type = IC_NON_CONFIRMABLE;
         }
         if (req < 32) {
             self.code = req;
         }
         else {
-            self.code = GET;
+            self.code = IC_GET;
         }
         
         self.isRequest = YES;

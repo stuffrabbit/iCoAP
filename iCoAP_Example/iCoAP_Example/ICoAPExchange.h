@@ -53,20 +53,21 @@
 
 
 typedef enum {
-    NO_RESPONSE_EXPECTED,       //  MAX_WAIT time expired and no response is expected
-    UDP_SOCKET_ERROR,           //  UDP Socket setup/bind failed
-    PROXYING_ERROR              //  Error during Proxying
+    IC_RESPONSE_TIMEOUT,            //  MAX_WAIT time expired and no response is expected
+    IC_UDP_SOCKET_ERROR,            //  UDP Socket setup/bind failed
+    IC_PROXYING_ERROR               //  Error during Proxying
 } ICoAPExchangeErrorCode;
 
 
 typedef enum {
-    PLAIN = 0,
-    LINK_FORMAT = 40,
-    XML = 41,
-    OCTET_STREAM = 42,
-    EXI = 47,
-    JSON = 50
-} SupportedContentFormats;
+    IC_PLAIN = 0,
+    IC_LINK_FORMAT = 40,
+    IC_XML = 41,
+    IC_OCTET_STREAM = 42,
+    IC_EXI = 47,
+    IC_JSON = 50,
+    IC_CBOR = 60
+} ICoAPKnownContentFormats;
 
 
 @interface ICoAPExchange : NSObject<GCDAsyncUdpSocketDelegate, NSURLConnectionDataDelegate, NSURLConnectionDelegate> {
@@ -172,11 +173,11 @@ typedef enum {
 - (void)cancelObserve;
 
 /*
- *  'closeTransmission':
- *  Closes the current transmission and Udp Socket.
+ *  'closeExchange':
+ *  Closes the current exchange and Udp Socket.
  *  Should always be called, if a transmission is (expected to be) finished.
  */
-- (void)closeTransmission;
+- (void)closeExchange;
 
 /*
  *  'decodeCoAPMessageFromData':

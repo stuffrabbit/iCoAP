@@ -21,65 +21,65 @@
  * Type with +4 value for version 
  */
 typedef enum {
-    CONFIRMABLE = 4,
-    NON_CONFIRMABLE = 5,
-    ACKNOWLEDGMENT = 6,
-    RESET = 7
-} CoAPType;
+    IC_CONFIRMABLE = 4,
+    IC_NON_CONFIRMABLE = 5,
+    IC_ACKNOWLEDGMENT = 6,
+    IC_RESET = 7
+} ICoAPType;
 
 typedef enum {
-    GET = 1,
-    POST = 2,
-    PUT = 3,
-    DELETE = 4
-} CoAPRequestMethod;
+    IC_GET = 1,
+    IC_POST = 2,
+    IC_PUT = 3,
+    IC_DELETE = 4
+} ICoAPRequestMethod;
 
 typedef enum {
-    EMPTY = 0,
-    CREATED = 65,
-    DELETED = 66,
-    VALID = 67,
-    CHANGED = 68,
-    CONTENT = 69,
-    BAD_REQUEST = 128,
-    UNAUTHORIZED = 129,
-    BAD_OPTION = 130,
-    FORBIDDEN = 131,
-    NOT_FOUND = 132,
-    METHOD_NOT_ALLOWED = 133,
-    NOT_ACCEPTABLE = 134,
-    PRECONDITION_FAILED = 140,
-    REQUEST_ENTITY_TOO_LARGE = 141,
-    UNSUPPORTED_CONTENT_FORMAT = 143,
-    INTERNAL_SERVER_ERROR = 160,
-    NOT_IMPLEMENTED = 161,
-    BAD_GATEWAY = 162,
-    SERVICE_UNAVAILABLE = 163,
-    GATEWAY_TIMEOUT = 164,
-    PROXYING_NOT_SUPPORTED = 165
-} CoAPResponseCode;
+    IC_EMPTY = 0,
+    IC_CREATED = 65,
+    IC_DELETED = 66,
+    IC_VALID = 67,
+    IC_CHANGED = 68,
+    IC_CONTENT = 69,
+    IC_BAD_REQUEST = 128,
+    IC_UNAUTHORIZED = 129,
+    IC_BAD_OPTION = 130,
+    IC_FORBIDDEN = 131,
+    IC_NOT_FOUND = 132,
+    IC_METHOD_NOT_ALLOWED = 133,
+    IC_NOT_ACCEPTABLE = 134,
+    IC_PRECONDITION_FAILED = 140,
+    IC_REQUEST_ENTITY_TOO_LARGE = 141,
+    IC_UNSUPPORTED_CONTENT_FORMAT = 143,
+    IC_INTERNAL_SERVER_ERROR = 160,
+    IC_NOT_IMPLEMENTED = 161,
+    IC_BAD_GATEWAY = 162,
+    IC_SERVICE_UNAVAILABLE = 163,
+    IC_GATEWAY_TIMEOUT = 164,
+    IC_PROXYING_NOT_SUPPORTED = 165
+} ICoAPResponseCode;
 
 typedef enum {
-    IF_MATCH = 1,
-    URI_HOST = 3,
-    ETAG = 4,
-    IF_NONE_MATCH = 5,
-    OBSERVE = 6,
-    URI_PORT = 7,
-    LOCATION_PATH = 8,
-    URI_PATH = 11,
-    CONTENT_FORMAT = 12,
-    MAX_AGE = 14,
-    URI_QUERY = 15,
-    ACCEPT = 17,
-    LOCATION_QUERY = 20,
-    BLOCK2 = 23,
-    BLOCK1 = 27,
-    SIZE2 = 28,
-    PROXY_URI = 35,
-    PROXY_SCHEME = 39,
-    SIZE1 = 60
-} CoAPOption;
+    IC_IF_MATCH = 1,
+    IC_URI_HOST = 3,
+    IC_ETAG = 4,
+    IC_IF_NONE_MATCH = 5,
+    IC_OBSERVE = 6,
+    IC_URI_PORT = 7,
+    IC_LOCATION_PATH = 8,
+    IC_URI_PATH = 11,
+    IC_CONTENT_FORMAT = 12,
+    IC_MAX_AGE = 14,
+    IC_URI_QUERY = 15,
+    IC_ACCEPT = 17,
+    IC_LOCATION_QUERY = 20,
+    IC_BLOCK2 = 23,
+    IC_BLOCK1 = 27,
+    IC_SIZE2 = 28,
+    IC_PROXY_URI = 35,
+    IC_PROXY_SCHEME = 39,
+    IC_SIZE1 = 60
+} ICoAPOption;
 
 
 @interface ICoAPMessage : NSObject
