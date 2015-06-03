@@ -332,10 +332,7 @@
         [self sendCircumstantialResponseWithMessageID:cO.messageID type:IC_ACKNOWLEDGMENT toAddress:address];
     }
     
-    //Block Options: Only send a Block2 request when observe option is inactive:
-    if ([cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", IC_BLOCK2]] && ![cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", IC_OBSERVE]]) {
-        [self handleBlock2OptionForCoapMessage:cO];
-    }
+    [self handleBlock2OptionForCoapMessage:cO];
     
     //Check for Observe Option: If Observe Option is present, the message is only sent to the delegate if the order is correct.
     if ([cO.optionDict valueForKey:[NSString stringWithFormat:@"%i", IC_OBSERVE]] && cO.type != IC_ACKNOWLEDGMENT) {
@@ -349,7 +346,7 @@
         
         if ((observeOptionValue < currentObserveValue && currentObserveValue - observeOptionValue < kMaxObserveOptionValue) ||
             (observeOptionValue > currentObserveValue && observeOptionValue - currentObserveValue > kMaxObserveOptionValue) ||
-            [recentNotificationDate compare:cO.timestamp] == NSOrderedAscending) {
+            [recentNotificationDate compare:[cO.timestamp dateByAddingTimeInterval:128.0]] == NSOrderedAscending) {
             
             recentNotificationDate = cO.timestamp;
             observeOptionValue = currentObserveValue;

@@ -10,29 +10,29 @@
 	<string>iCoAP_Example</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
-		<key>540311BA-F1FD-4E52-AD1A-66B302FEA8ED</key>
+		<key>F3BC7D18755C27549DAC51B586F4102B3CC2AEF4</key>
 		<string>https://github.com/stuffrabbit/iCoAP.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>iCoAP_Example/iCoAP_Example.xcodeproj/project.xcworkspace</string>
+	<string>iCoAP_Example/iCoAP_Example.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
-		<key>540311BA-F1FD-4E52-AD1A-66B302FEA8ED</key>
+		<key>F3BC7D18755C27549DAC51B586F4102B3CC2AEF4</key>
 		<string>../../..</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
 	<string>https://github.com/stuffrabbit/iCoAP.git</string>
 	<key>IDESourceControlProjectVersion</key>
-	<integer>110</integer>
+	<integer>111</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
-	<string>540311BA-F1FD-4E52-AD1A-66B302FEA8ED</string>
+	<string>F3BC7D18755C27549DAC51B586F4102B3CC2AEF4</string>
 	<key>IDESourceControlProjectWCConfigurations</key>
 	<array>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>540311BA-F1FD-4E52-AD1A-66B302FEA8ED</string>
+			<string>F3BC7D18755C27549DAC51B586F4102B3CC2AEF4</string>
 			<key>IDESourceControlWCCName</key>
 			<string>iCoAP</string>
 		</dict>
