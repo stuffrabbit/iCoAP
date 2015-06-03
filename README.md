@@ -50,6 +50,25 @@ ICoAPExchange *exchange =
 
 Now you should be able to communicate.
 
+
+HTTP-Proxying:
+====
+It is possible to send a CoAP-Message via a HTTP-Proxy. You just have to set the following Properties after creating a CoAP-Message
+```objc
+CoAPMessage *message = 
+    [[ICoAPMessage alloc] initAsRequestConfirmable:YES 
+                                      requestMethod:GET
+                                      sendToken:YES 
+                                      payload:@""];
+[message setUsesHttpProxying:YES];
+[message setHttpProxyHost:@"localhost"];
+[message setHttpProxyPort:5683];
+```
+
+The Options of the CoAP-Message are sent in the HTTP-Header. It is required that the Proxy returns the CoAP-Type in the Header of HTTP-Response as well. The respective Header-Field is `COAP_TYPE`.
+The Request-URI has the following Format: `http://proxyHost:proxyPort/coapHost:coapPort`
+An Example: Sending your message to the CoAP-Server `coap.me` with the Port `5683` via a HTTP-Proxy located at `localhost:9292`, lets the iCoAP-Library compose the follwoing Request-URI: `http://localhost:9292/coap.me:5683`
+
 Details and Examples:
 ====
 
