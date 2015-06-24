@@ -6,7 +6,7 @@ The current version has besides the standard CoAP features the following additio
 * Observe
 * Block transfer in responses (Block 2)
 
-Do you want more features or a server implementation? Checkout my new project **SwiftCoAP** (https://github.com/stuffrabbit/SwiftCoAP) - a client and server implementation of CoAP in Apple's beautiful new programming language *Swift*, with more functionality than iCoAP (Block1, Caching, etc.).
+Do you want more features or a server implementation? Checkout my new project [SwiftCoAP](https://github.com/stuffrabbit/SwiftCoAP) - a client and server implementation of CoAP in Apple's beautiful new programming language *Swift*, with more functionality than iCoAP (Block1, Caching, etc.).
 
 Getting Started
 =====
@@ -79,4 +79,4 @@ Used Libraries:
 =====
  This version uses the public domain licensed CocoaAsyncSocket library 
  for UDP-socket networking.
- See more on https://github.com/robbiehanson/CocoaAsyncSocket
+ [Click here](https://github.com/robbiehanson/CocoaAsyncSocket) for more information
