@@ -6,8 +6,7 @@ The current version has besides the standard CoAP features the following additio
 * Observe
 * Block transfer in responses (Block 2)
 
-Since this project is quite new, any sort of constructive feedback is highly appreciated!
-
+Do you want more features or a server implementation? Checkout my new project **SwiftCoAP** (https://github.com/stuffrabbit/SwiftCoAP) - a client and server implementation of CoAP in Apple's beautiful new programming language *Swift*, with more functionality than iCoAP (Block1, Caching, etc.).
 
 Getting Started
 =====
