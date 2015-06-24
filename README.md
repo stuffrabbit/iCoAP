@@ -79,4 +79,4 @@ Used Libraries:
 =====
  This version uses the public domain licensed CocoaAsyncSocket library 
  for UDP-socket networking.
- [Click here](https://github.com/robbiehanson/CocoaAsyncSocket) for more information
+ [Click here](https://github.com/robbiehanson/CocoaAsyncSocket) for more information.
