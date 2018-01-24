@@ -207,7 +207,19 @@
     
     //Payload, first check if payloadmarker exists
     if (payloadStartIndex + 2 < [hexString length]) {
-        cO.payload = [self requiresPayloadStringDecodeForCoAPMessage:cO] ? [[NSString stringFromHexString:[hexString substringFromIndex:payloadStartIndex + 2]] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding] : [hexString substringFromIndex:payloadStartIndex + 2];
+        if ([self requiresPayloadStringDecodeForCoAPMessage:cO]){
+            NSString* stringWithoutPercentEncoding = [NSString stringFromHexString:[hexString substringFromIndex:payloadStartIndex + 2]];
+            NSString* stringWithPercentEncoding = [stringWithoutPercentEncoding stringByRemovingPercentEncoding];
+            
+            // check if we can use percent encoding (for the emoji!)
+            if (stringWithPercentEncoding == nil) {
+                cO.payload = stringWithoutPercentEncoding;
+            } else {
+                cO.payload = stringWithPercentEncoding;
+            }
+        } else {
+            cO.payload = [hexString substringFromIndex:payloadStartIndex + 2];
+        }
     }
     return cO;
 }
