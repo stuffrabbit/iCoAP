@@ -24,10 +24,20 @@
 }
 
 + (NSString *)stringFromDataWithHex:(NSData *)data{
-    NSString *result = [[data description] stringByReplacingOccurrencesOfString:@" " withString:@""];
-    result = [result substringWithRange:NSMakeRange(1, [result length] - 2)];
-    
-    return result;
+	// We first need to get the length of our hexstring
+	// data.length returns the length in bytes, so we *2 to get as hexstring
+	NSUInteger capacity = data.length * 2;
+	// Create a new NSMutableString with the correct lenght
+	NSMutableString *mutableString = [NSMutableString stringWithCapacity:capacity];
+	// get the bytes of data to be able to loop through it
+	const unsigned char *buf = (const unsigned char*) [data bytes];
+	 
+	NSInteger t;
+	for (t=0; t<data.length; ++t) {
+		// "%02x" will append a 0 if the value is less than 2 digits (i.e. 4 becomes 04)
+		[mutableString appendFormat:@"%02lx", (unsigned long)buf[t]];
+	}
+	return [NSString stringWithString:mutableString];
 }
 
 + (NSString *)get0To4ByteHexStringFromInt:(int32_t)value {
