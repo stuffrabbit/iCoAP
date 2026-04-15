@@ -107,7 +107,7 @@
     
     //Check Version and type (first 4 bits)
     cO.type = strtol([[hexString substringWithRange:NSMakeRange(0, 1)] UTF8String], NULL, 16);
-    if (IC_CONFIRMABLE < cO.type > IC_RESET) {
+    if (cO.type < IC_CONFIRMABLE || cO.type > IC_RESET) {
         return nil;
     }
     
